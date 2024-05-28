@@ -7,6 +7,11 @@ function ulx.psay( calling_ply, target_ply, message )
 		ULib.tsayError( calling_ply, "You are muted, and therefore cannot speak! Use asay for admin chat if urgent.", true )
 		return
 	end
+	
+	if not tobool(target_ply:GetInfoNum("classicbox_enablepm", 1)) then
+		ULib.tsayError( calling_ply, "У этого игрока закрыто ЛС!", true )
+		return
+	end
 
 	ulx.fancyLog( { target_ply, calling_ply }, "#P to #P: " .. message, calling_ply, target_ply )
 end

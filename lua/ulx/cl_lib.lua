@@ -71,7 +71,7 @@ local function optionsDraw()
 	local w, h = surface.GetTextSize( title )
 	w = math.max( 200, w )
 	local totalh = h * 12 + 20
-	draw.RoundedBox( 8, 10, ScrH()*0.4 - 10, w + 20, totalh, Color( 111, 124, 138, 200 ) )
+	draw.RoundedBox( 8, 10, ScrH()*0.4 - 10, w + 20, totalh, Color( 44, 44, 44, 200 ) )
 
 	optiontxt = ""
 	for i=1, 10 do

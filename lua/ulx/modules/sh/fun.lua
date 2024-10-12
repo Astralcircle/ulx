@@ -392,7 +392,7 @@ blind:setOpposite( "ulx unblind", {_, _, _, true}, "!unblind" )
 ------------------------------ Jail ------------------------------
 local doJail
 local jailableArea
-function ulx.jail( calling_ply, target_plys, seconds, should_unjail )
+function ulx.jail( calling_ply, target_plys, seconds, reason, should_unjail )
 	local affected_plys = {}
 	for i=1, #target_plys do
 		local v = target_plys[ i ]
@@ -419,7 +419,11 @@ function ulx.jail( calling_ply, target_plys, seconds, should_unjail )
 		if seconds > 0 then
 			str = str .. " for #i seconds"
 		end
-		ulx.fancyLogAdmin( calling_ply, str, affected_plys, seconds )
+
+        if #reason > 1 then
+            str = str .. " by reason: #s"
+        end
+		ulx.fancyLogAdmin( calling_ply, str, affected_plys, seconds, reason )
 	else
 		ulx.fancyLogAdmin( calling_ply, "#A unjailed #T", affected_plys )
 	end
@@ -427,13 +431,14 @@ end
 local jail = ulx.command( CATEGORY_NAME, "ulx jail", ulx.jail, "!jail" )
 jail:addParam{ type=ULib.cmds.PlayersArg }
 jail:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
+jail:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional}
 jail:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 jail:defaultAccess( ULib.ACCESS_ADMIN )
 jail:help( "Jails target(s)." )
-jail:setOpposite( "ulx unjail", {_, _, _, true}, "!unjail" )
+jail:setOpposite( "ulx unjail", {_, _, _, true, ""}, "!unjail" )
 
 ------------------------------ Jail TP ------------------------------
-function ulx.jailtp( calling_ply, target_ply, seconds )
+function ulx.jailtp( calling_ply, target_ply, seconds, reason )
 	local t = {}
 	t.start = calling_ply:GetPos() + Vector( 0, 0, 32 ) -- Move them up a bit so they can travel across the ground
 	t.endpos = calling_ply:GetPos() + calling_ply:EyeAngles():Forward() * 16384
@@ -472,11 +477,16 @@ function ulx.jailtp( calling_ply, target_ply, seconds )
 	if seconds > 0 then
 		str = str .. " for #i seconds"
 	end
-	ulx.fancyLogAdmin( calling_ply, str, target_ply, seconds )
+
+	if #reason > 1 then
+		str = str .. " by reason: #s"
+	end
+	ulx.fancyLogAdmin( calling_ply, str, target_ply, seconds, reason )
 end
 local jailtp = ulx.command( CATEGORY_NAME, "ulx jailtp", ulx.jailtp, "!jailtp" )
 jailtp:addParam{ type=ULib.cmds.PlayerArg }
 jailtp:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
+jailtp:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional}
 jailtp:defaultAccess( ULib.ACCESS_ADMIN )
 jailtp:help( "Teleports, then jails target(s)." )
 

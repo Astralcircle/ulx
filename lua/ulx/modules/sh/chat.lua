@@ -226,26 +226,55 @@ if SERVER then
 end
 
 ------------------------------ Gag ------------------------------
-function ulx.gag( calling_ply, target_plys, should_ungag )
-	local players = player.GetAll()
+function ulx.gag( calling_ply, target_plys, seconds, reason, should_ungag )
 	for i=1, #target_plys do
 		local v = target_plys[ i ]
 		v.ulx_gagged = not should_ungag
 		v:SetNWBool("ulx_gagged", v.ulx_gagged)
 	end
 
+	if not should_ungag and seconds > 0 then
+		timer.Simple(seconds, function()
+			for i=1, #target_plys do
+				local v = target_plys[ i ]
+
+				if IsValid(v) and v.ulx_gagged then
+					v.ulx_gagged = false
+					v:SetNWBool("ulx_gagged", false)
+					v:ChatPrint("Вы размучены")
+				end
+			end
+		end)
+	end
+
 	if not should_ungag then
-		ulx.fancyLogAdmin( calling_ply, "#A gagged #T", target_plys )
+		local str = "#A gagged #T"
+
+		if seconds > 0 then
+			str = str .. " for #i seconds"
+		end
+
+		if #reason > 0 then
+			str = str .. " by reason: #s"
+
+			if seconds <= 0 then
+				seconds = reason
+			end
+		end
+
+		ulx.fancyLogAdmin( calling_ply, str, target_plys, seconds, reason )
 	else
 		ulx.fancyLogAdmin( calling_ply, "#A ungagged #T", target_plys )
 	end
 end
 local gag = ulx.command( CATEGORY_NAME, "ulx gag", ulx.gag, "!gag" )
 gag:addParam{ type=ULib.cmds.PlayersArg }
+gag:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
+gag:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional }
 gag:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 gag:defaultAccess( ULib.ACCESS_ADMIN )
 gag:help( "Gag target(s), disables microphone." )
-gag:setOpposite( "ulx ungag", {_, _, true}, "!ungag" )
+gag:setOpposite( "ulx ungag", {_, _, 0, "", true}, "!ungag" )
 
 local function gagHook( listener, talker )
 	if talker.ulx_gagged then

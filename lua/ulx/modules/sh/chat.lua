@@ -190,7 +190,7 @@ gimp:help( "Gimps target(s) so they are unable to chat normally." )
 gimp:setOpposite( "ulx ungimp", {_, _, true}, "!ungimp" )
 
 ------------------------------ Mute ------------------------------
-function ulx.mute( calling_ply, target_plys, should_unmute )
+function ulx.mute( calling_ply, target_plys, seconds, reason, should_unmute )
 	for i=1, #target_plys do
 		local v = target_plys[ i ]
 		if should_unmute then
@@ -201,18 +201,48 @@ function ulx.mute( calling_ply, target_plys, should_unmute )
 		v:SetNWBool("ulx_muted", not should_unmute)
 	end
 
+	if not should_unmute and seconds > 0 then
+		timer.Simple(seconds, function()
+			for i=1, #target_plys do
+				local v = target_plys[ i ]
+
+				if IsValid(v) and v.gimp then
+					v.gimp = nil
+					v:SetNWBool("ulx_muted", false)
+					v:ChatPrint("Вы размучены")
+				end
+			end
+		end)
+	end
+
 	if not should_unmute then
-		ulx.fancyLogAdmin( calling_ply, "#A muted #T", target_plys )
+		local str = "#A muted #T"
+
+		if seconds > 0 then
+			str = str .. " for #i seconds"
+		end
+
+		if #reason > 0 then
+			str = str .. " by reason: #s"
+
+			if seconds <= 0 then
+				seconds = reason
+			end
+		end
+
+		ulx.fancyLogAdmin( calling_ply, str, target_plys, seconds, reason )
 	else
 		ulx.fancyLogAdmin( calling_ply, "#A unmuted #T", target_plys )
 	end
 end
 local mute = ulx.command( CATEGORY_NAME, "ulx mute", ulx.mute, "!mute" )
 mute:addParam{ type=ULib.cmds.PlayersArg }
+mute:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
+mute:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional }
 mute:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 mute:defaultAccess( ULib.ACCESS_ADMIN )
 mute:help( "Mutes target(s) so they are unable to chat." )
-mute:setOpposite( "ulx unmute", {_, _, true}, "!unmute" )
+mute:setOpposite( "ulx unmute", {_, _, 0, "", true}, "!unmute" )
 
 if SERVER then
 	local function gimpCheck( ply, strText )
@@ -241,7 +271,7 @@ function ulx.gag( calling_ply, target_plys, seconds, reason, should_ungag )
 				if IsValid(v) and v.ulx_gagged then
 					v.ulx_gagged = false
 					v:SetNWBool("ulx_gagged", false)
-					v:ChatPrint("Вы размучены")
+					v:ChatPrint("Вы разгаганы")
 				end
 			end
 		end)

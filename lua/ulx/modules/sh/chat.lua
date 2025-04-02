@@ -195,6 +195,7 @@ function ulx.mute( calling_ply, target_plys, seconds, reason, should_unmute )
 		local v = target_plys[ i ]
 		if should_unmute then
 			v.gimp = nil
+			timer.Remove("ULXMute_" .. v:UserID())
 		else
 			v.gimp = ID_MUTE
 		end
@@ -202,17 +203,17 @@ function ulx.mute( calling_ply, target_plys, seconds, reason, should_unmute )
 	end
 
 	if not should_unmute and seconds > 0 then
-		timer.Simple(seconds, function()
-			for i=1, #target_plys do
-				local v = target_plys[ i ]
+		for i=1, #target_plys do
+			local v = target_plys[ i ]
 
-				if IsValid(v) and v.gimp then
+			timer.Create("ULXMute_" .. v:UserID(), seconds, 1, function()
+				if v:IsValid() then
 					v.gimp = nil
 					v:SetNWBool("ulx_muted", false)
 					v:ChatPrint("Вы размучены")
 				end
-			end
-		end)
+			end)
+		end
 	end
 
 	if not should_unmute then
@@ -237,7 +238,7 @@ function ulx.mute( calling_ply, target_plys, seconds, reason, should_unmute )
 end
 local mute = ulx.command( CATEGORY_NAME, "ulx mute", ulx.mute, "!mute" )
 mute:addParam{ type=ULib.cmds.PlayersArg }
-mute:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
+mute:addParam{ type=ULib.cmds.NumArg, min=0, max=1800, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
 mute:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional }
 mute:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 mute:defaultAccess( ULib.ACCESS_ADMIN )
@@ -259,22 +260,29 @@ end
 function ulx.gag( calling_ply, target_plys, seconds, reason, should_ungag )
 	for i=1, #target_plys do
 		local v = target_plys[ i ]
-		v.ulx_gagged = not should_ungag
-		v:SetNWBool("ulx_gagged", v.ulx_gagged)
+
+		if should_ungag then
+			v.ulx_gagged = false
+			v:SetNWBool("ulx_gagged", false)
+			timer.Remove("ULXGag_" .. v:UserID())
+		else
+			v.ulx_gagged = true
+			v:SetNWBool("ulx_gagged", true)
+		end
 	end
 
 	if not should_ungag and seconds > 0 then
-		timer.Simple(seconds, function()
-			for i=1, #target_plys do
-				local v = target_plys[ i ]
+		for i=1, #target_plys do
+			local v = target_plys[ i ]
 
-				if IsValid(v) and v.ulx_gagged then
+			timer.Create("ULXGag_" .. v:UserID(), seconds, 1, function()
+				if v:IsValid() then
 					v.ulx_gagged = false
 					v:SetNWBool("ulx_gagged", false)
 					v:ChatPrint("Вы разгаганы")
 				end
-			end
-		end)
+			end)
+		end
 	end
 
 	if not should_ungag then
@@ -299,7 +307,7 @@ function ulx.gag( calling_ply, target_plys, seconds, reason, should_ungag )
 end
 local gag = ulx.command( CATEGORY_NAME, "ulx gag", ulx.gag, "!gag" )
 gag:addParam{ type=ULib.cmds.PlayersArg }
-gag:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
+gag:addParam{ type=ULib.cmds.NumArg, min=0, max=1800, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
 gag:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional }
 gag:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 gag:defaultAccess( ULib.ACCESS_ADMIN )

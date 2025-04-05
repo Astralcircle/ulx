@@ -540,6 +540,8 @@ doJail = function( v, seconds )
 		v.jail.unjail()
 	end
 
+	v:ChatPrint("ВНИМАНИЕ! За выход из джайла вы получите авто-бан на 7 дней!")
+
 	if v:InVehicle() then
 		local vehicle = v:GetParent()
 		v:ExitVehicle()

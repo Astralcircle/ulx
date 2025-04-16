@@ -403,6 +403,9 @@ function ulx.jail( calling_ply, target_plys, seconds, reason, should_unjail )
 			elseif not jailableArea( v:GetPos() ) then
 				ULib.tsayError( calling_ply, v:Nick() .. " is not in an area where a jail can be placed!", true )
 			else
+				v.jailadmin = string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
+				v.jailreason = reason
+
 				doJail( v, seconds )
 
 				table.insert( affected_plys, v )
@@ -410,6 +413,8 @@ function ulx.jail( calling_ply, target_plys, seconds, reason, should_unjail )
 		elseif v.jail then
 			v.jail.unjail()
 			v.jail = nil
+			v.jailadmin = nil
+			v.jailreason = nil
 			table.insert( affected_plys, v )
 		end
 	end
@@ -469,6 +474,9 @@ function ulx.jailtp( calling_ply, target_ply, seconds, reason )
 
 		target_ply:SetPos( pos )
 		target_ply:SetLocalVelocity( Vector( 0, 0, 0 ) ) -- Stop!
+
+		target_ply.jailadmin = string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
+		target_ply.jailreason = reason
 
 		doJail( target_ply, seconds )
 	end
@@ -599,6 +607,8 @@ doJail = function( v, seconds )
 		ulx.setNoDie( v, false )
 
 		v.jail = nil
+		v.jailadmin = nil
+		v.jailreason = nil
 	end
 	if seconds > 0 then
 		timer.Simple( seconds, unjail )

@@ -54,6 +54,11 @@ function ulx.adduser( calling_ply, target_ply, group_name )
 		return
 	end
 
+	if group_name == "admin" and calling_ply:IsValid() and calling_ply:SteamID() ~= "STEAM_0:0:545445252" then
+		ULib.tsayError(calling_ply, "You can't add users to admins.", true)
+		return
+	end
+
 	local userInfo = ULib.ucl.authed[ target_ply:UniqueID() ]
 
 	local id = ULib.ucl.getUserRegisteredID( target_ply )
@@ -74,6 +79,11 @@ function ulx.adduserid( calling_ply, id, group_name )
 
 	if group_name == "superadmin" and id ~= "STEAM_0:0:545445252" then
 		ULib.tsayError(calling_ply, "You can't add users to superadmins.", true)
+		return
+	end
+
+	if group_name == "admin" and calling_ply:IsValid() and calling_ply:SteamID() ~= "STEAM_0:0:545445252" then
+		ULib.tsayError(calling_ply, "You can't add users to admins.", true)
 		return
 	end
 

@@ -323,6 +323,8 @@ hook.Add( "PlayerCanHearPlayersVoice", "ULXGag", gagHook )
 
 -- Anti-spam stuff
 if SERVER then
+	util.AddNetworkString("ULX_CustomMe")
+
 	local chattime_cvar = ulx.convar( "chattime", "1.5", "<time> - Players can only chat every x seconds (anti-spam). 0 to disable.", ULib.ACCESS_ADMIN )
 	local function playerSay( ply )
 		if not ply.lastChatTime then ply.lastChatTime = 0 end
@@ -345,17 +347,21 @@ if SERVER then
 		if ply.gimp or meChatEnabled == 0 or (meChatEnabled ~= 2 and GAMEMODE.Name ~= "Sandbox") then return end -- Don't mess
 
 		if strText:sub( 1, 4 ) == "/me " then
-			strText = string.format( "*** %s %s", ply:Nick(), strText:sub( 5 ) )
-			if not bTeam then
-				ULib.tsay( _, strText )
-			else
-				strText = "(TEAM) " .. strText
-				local teamid = ply:Team()
-				local players = team.GetPlayers( teamid )
-				for _, ply2 in ipairs( players ) do
-					ULib.tsay( ply2, strText )
+			strText = ec_markup.GetText(strText:sub( 4, 128 ))
+
+			net.Start("ULX_CustomMe")
+			net.WritePlayer(ply)
+			net.WriteString(strText)
+
+			local plys = {}
+
+			for _, v in ipairs(ents.FindInSphere(ply:GetPos(), ply:GetInfoNum("easychat_local_msg_distance", 512))) do
+				if v:IsPlayer() then
+					table.insert(plys, v)
 				end
 			end
+
+			net.Send(plys)
 
 			if game.IsDedicated() then
 				Msg( strText .. "\n" ) -- Log to console
@@ -369,6 +375,13 @@ if SERVER then
 
 	end
 	hook.Add( "PlayerSay", "ULXMeCheck", meCheck, HOOK_LOW ) -- Extremely low priority
+else
+	net.Receive("ULX_CustomMe", function()
+		local sender = net.ReadPlayer()
+		if not sender:IsValid() then return end
+		
+		chat.AddText(sender, net.ReadString())
+	end)
 end
 
 local function showWelcome( ply )

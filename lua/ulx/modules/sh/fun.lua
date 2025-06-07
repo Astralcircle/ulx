@@ -413,8 +413,6 @@ function ulx.jail( calling_ply, target_plys, seconds, reason, should_unjail )
 		elseif v.jail then
 			v.jail.unjail()
 			v.jail = nil
-			v.jailadmin = nil
-			v.jailreason = nil
 			table.insert( affected_plys, v )
 		end
 	end
@@ -607,8 +605,6 @@ doJail = function( v, seconds )
 		ulx.setNoDie( v, false )
 
 		v.jail = nil
-		v.jailadmin = nil
-		v.jailreason = nil
 	end
 	if seconds > 0 then
 		timer.Simple( seconds, unjail )

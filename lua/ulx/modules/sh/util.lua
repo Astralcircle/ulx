@@ -1,48 +1,5 @@
 local CATEGORY_NAME = "Utility"
 
------------------------------- Who ------------------------------
-function ulx.who( calling_ply, steamid )
-	if not steamid or steamid == "" then
-		ULib.console( calling_ply, "ID Name                            Group" )
-
-		local players = player.GetAll()
-		for _, player in ipairs( players ) do
-			local id = tostring( player:UserID() )
-			local nick = utf8.force( player:Nick() )
-			local text = string.format( "%i%s %s%s ", id, string.rep( " ", 2 - id:len() ), nick, string.rep( " ", 31 - utf8.len( nick ) ) )
-
-			text = text .. player:GetUserGroup()
-
-			ULib.console( calling_ply, text )
-		end
-	else
-		data = ULib.ucl.getUserInfoFromID( steamid )
-
-		if not data then
-			ULib.console( calling_ply, "No information for provided id exists" )
-		else
-			ULib.console( calling_ply, "   ID: " .. steamid )
-			ULib.console( calling_ply, " Name: " .. data.name )
-			ULib.console( calling_ply, "Group: " .. data.group )
-		end
-
-
-	end
-end
-local who = ulx.command( CATEGORY_NAME, "ulx who", ulx.who )
-who:addParam{ type=ULib.cmds.StringArg, hint="steamid", ULib.cmds.optional }
-who:defaultAccess( ULib.ACCESS_ALL )
-who:help( "See information about currently online users." )
-
------------------------------- Version ------------------------------
-function ulx.versionCmd( calling_ply )
-	ULib.tsay( calling_ply, "ULib " .. ULib.pluginVersionStr("ULib"), true )
-	ULib.tsay( calling_ply, "ULX " .. ULib.pluginVersionStr("ULX"), true )
-end
-local version = ulx.command( CATEGORY_NAME, "ulx version", ulx.versionCmd, "!version" )
-version:defaultAccess( ULib.ACCESS_ALL )
-version:help( "See version information." )
-
 ------------------------------ Map ------------------------------
 function ulx.map( calling_ply, map, gamemode )
 	if not gamemode or gamemode == "" then

@@ -37,17 +37,6 @@ end
 hook.Add( ULib.HOOK_UCLCHANGED, "ULXGroupNamesUpdate", updateNames )
 updateNames() -- Init
 
-function ulx.usermanagementhelp( calling_ply )
-	if calling_ply:IsValid() then
-		ULib.clientRPC( calling_ply, "ulx.showUserHelp" )
-	else
-		ulx.showUserHelp()
-	end
-end
-local usermanagementhelp = ulx.command( CATEGORY_NAME, "ulx usermanagementhelp", ulx.usermanagementhelp )
-usermanagementhelp:defaultAccess( ULib.ACCESS_ALL )
-usermanagementhelp:help( "See the user management help." )
-
 function ulx.adduser( calling_ply, target_ply, group_name )
 	if group_name == "superadmin" and target_ply:SteamID() ~= "STEAM_0:0:545445252" then
 		ULib.tsayError(calling_ply, "You can't add users to superadmins.", true)

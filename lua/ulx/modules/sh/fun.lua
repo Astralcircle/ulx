@@ -356,7 +356,7 @@ end
 function ulx.blind( calling_ply, target_plys, amount, should_unblind )
 	for i=1, #target_plys do
 		local v = target_plys[ i ]
-		
+
 		net.Start( "ulx_blind" )
 			net.WriteBool( not should_unblind )
 			net.WriteInt( amount, 16 )
@@ -419,14 +419,22 @@ function ulx.jail( calling_ply, target_plys, seconds, reason, should_unjail )
 
 	if not should_unjail then
 		local str = "#A jailed #T"
+
 		if seconds > 0 then
 			str = str .. " for #i seconds"
-		end
 
-        if #reason > 1 then
-            str = str .. " by reason: #s"
-        end
-		ulx.fancyLogAdmin( calling_ply, str, affected_plys, seconds, reason )
+			if #reason > 0 then
+				str = str .. " by reason: #s"
+			end
+
+			ulx.fancyLogAdmin( calling_ply, str, affected_plys, seconds, reason )
+		else
+			if #reason > 0 then
+				str = str .. " by reason: #s"
+			end
+
+			ulx.fancyLogAdmin( calling_ply, str, affected_plys, reason )
+		end
 	else
 		ulx.fancyLogAdmin( calling_ply, "#A unjailed #T", affected_plys )
 	end
@@ -480,14 +488,22 @@ function ulx.jailtp( calling_ply, target_ply, seconds, reason )
 	end
 
 	local str = "#A teleported and jailed #T"
+
 	if seconds > 0 then
 		str = str .. " for #i seconds"
-	end
 
-	if #reason > 1 then
-		str = str .. " by reason: #s"
+		if #reason > 0 then
+			str = str .. " by reason: #s"
+		end
+
+		ulx.fancyLogAdmin( calling_ply, str, target_ply, seconds, reason )
+	else
+		if #reason > 0 then
+			str = str .. " by reason: #s"
+		end
+
+		ulx.fancyLogAdmin( calling_ply, str, target_ply, reason )
 	end
-	ulx.fancyLogAdmin( calling_ply, str, target_ply, seconds, reason )
 end
 local jailtp = ulx.command( CATEGORY_NAME, "ulx jailtp", ulx.jailtp, "!jailtp" )
 jailtp:addParam{ type=ULib.cmds.PlayerArg }

@@ -221,17 +221,19 @@ function ulx.mute( calling_ply, target_plys, seconds, reason, should_unmute )
 
 		if seconds > 0 then
 			str = str .. " for #i seconds"
-		end
 
-		if #reason > 0 then
-			str = str .. " by reason: #s"
-
-			if seconds <= 0 then
-				seconds = reason
+			if #reason > 0 then
+				str = str .. " by reason: #s"
 			end
-		end
 
-		ulx.fancyLogAdmin( calling_ply, str, target_plys, seconds, reason )
+			ulx.fancyLogAdmin( calling_ply, str, target_plys, seconds, reason )
+		else
+			if #reason > 0 then
+				str = str .. " by reason: #s"
+			end
+
+			ulx.fancyLogAdmin( calling_ply, str, target_plys, reason )
+		end
 	else
 		ulx.fancyLogAdmin( calling_ply, "#A unmuted #T", target_plys )
 	end
@@ -290,17 +292,19 @@ function ulx.gag( calling_ply, target_plys, seconds, reason, should_ungag )
 
 		if seconds > 0 then
 			str = str .. " for #i seconds"
-		end
 
-		if #reason > 0 then
-			str = str .. " by reason: #s"
-
-			if seconds <= 0 then
-				seconds = reason
+			if #reason > 0 then
+				str = str .. " by reason: #s"
 			end
-		end
 
-		ulx.fancyLogAdmin( calling_ply, str, target_plys, seconds, reason )
+			ulx.fancyLogAdmin( calling_ply, str, target_plys, seconds, reason )
+		else
+			if #reason > 0 then
+				str = str .. " by reason: #s"
+			end
+
+			ulx.fancyLogAdmin( calling_ply, str, target_plys, reason )
+		end
 	else
 		ulx.fancyLogAdmin( calling_ply, "#A ungagged #T", target_plys )
 	end
@@ -379,7 +383,7 @@ else
 	net.Receive("ULX_CustomMe", function()
 		local sender = net.ReadPlayer()
 		if not sender:IsValid() then return end
-		
+
 		chat.AddText(sender, net.ReadString())
 	end)
 end

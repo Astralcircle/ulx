@@ -359,7 +359,9 @@ local function makePlayerList( calling_ply, target_list, showing_ply, use_self_s
 		local target = target_list[ 1 ] -- Only one target here
 		if anonymous and target ~= showing_ply then
 			return { everyone_color, "(Someone)" }
-		elseif not target:IsValid() then
+		elseif isstring(target) then
+			return { player_color, target }
+		elseif not IsValid(target) then
 			return { console_color, "(Console)" }
 		end
 	end

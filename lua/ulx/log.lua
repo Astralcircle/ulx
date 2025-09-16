@@ -360,7 +360,7 @@ local function makePlayerList( calling_ply, target_list, showing_ply, use_self_s
 		if anonymous and target ~= showing_ply then
 			return { everyone_color, "(Someone)" }
 		elseif isstring(target) then
-			return { player_color, target }
+			return { logEchoColorPlayerAsGroup:GetBool() and team.GetColor(TEAM_UNASSIGNED) or player_color, target }
 		elseif not IsValid(target) then
 			return { console_color, "(Console)" }
 		end

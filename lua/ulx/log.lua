@@ -178,22 +178,9 @@ local function playerSay( ply, text, private )
 end
 hook.Add( "PlayerSay", "ULXLogSay", playerSay, HOOK_MONITOR_LOW )
 
-local joinTimer = {}
-local mapStartTime = os.time()
-local function playerConnect( name, address )
-	joinTimer[address] = os.time()
-	if logEvents:GetBool() then
-		ulx.logString( string.format( "Client \"%s\" connected.", name ) )
-	end
-end
-hook.Add( "PlayerConnect", "ULXLogConnect", playerConnect, HOOK_MONITOR_HIGH )
-
 local function playerInitialSpawn( ply )
-	local ip = ply:IPAddress()
-	local seconds = os.time() - (joinTimer[ip] or mapStartTime)
-	joinTimer[ip] = nil
+	local txt = string.format( "Client \"%s\" spawned in server <%s><%s>.", ply:Nick(), ply:SteamID(), ply:IPAddress() )
 
-	local txt = string.format( "Client \"%s\" spawned in server <%s> (took %i seconds).", ply:Nick(), ply:SteamID(), seconds )
 	if logEvents:GetBool() then
 		ulx.logString( txt )
 	end
@@ -205,7 +192,8 @@ end
 hook.Add( "PlayerInitialSpawn", "ULXLogInitialSpawn", playerInitialSpawn, HOOK_MONITOR_HIGH )
 
 local function playerDisconnect( ply )
-	local txt = string.format( "Dropped \"%s\" from server<%s>", ply:Nick(), ply:SteamID() )
+	local txt = string.format( "Dropped \"%s\" from server <%s><%s>", ply:Nick(), ply:SteamID(), ply:IPAddress() )
+
 	if logEvents:GetBool() then
 		ulx.logString( txt )
 	end

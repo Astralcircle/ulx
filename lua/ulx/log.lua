@@ -179,10 +179,10 @@ end
 hook.Add( "PlayerSay", "ULXLogSay", playerSay, HOOK_MONITOR_LOW )
 
 local function playerInitialSpawn( ply )
-	local txt = string.format( "Client \"%s\" spawned in server <%s><%s>.", ply:Nick(), ply:SteamID(), ply:IPAddress() )
+	local txt = string.format( "Client \"%s\" spawned in server <%s>", ply:Nick(), ply:SteamID() )
 
 	if logEvents:GetBool() then
-		ulx.logString( txt )
+		ulx.logString( string.format("%s<%s>", txt, ply:IPAddress() ) )
 	end
 
 	if logJoinLeaveEcho:GetBool() then
@@ -192,10 +192,10 @@ end
 hook.Add( "PlayerInitialSpawn", "ULXLogInitialSpawn", playerInitialSpawn, HOOK_MONITOR_HIGH )
 
 local function playerDisconnect( ply )
-	local txt = string.format( "Dropped \"%s\" from server <%s><%s>", ply:Nick(), ply:SteamID(), ply:IPAddress() )
+	local txt = string.format( "Dropped \"%s\" from server <%s>", ply:Nick(), ply:SteamID() )
 
 	if logEvents:GetBool() then
-		ulx.logString( txt )
+		ulx.logString( string.format("%s<%s>", txt, ply:IPAddress() ) )
 	end
 
 	if logJoinLeaveEcho:GetBool() then

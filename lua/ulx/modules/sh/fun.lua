@@ -401,7 +401,7 @@ function ulx.jail( calling_ply, target_plys, seconds, reason, should_unjail )
 			if ulx.getExclusive( v, calling_ply ) then
 				ULib.tsayError( calling_ply, ulx.getExclusive( v, calling_ply ), true )
 			else
-				v.jailadmin = string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
+				v.jailadmin = isstring(calling_ply) and calling_ply or string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
 				v.jailreason = reason
 
 				doJail( v, seconds )

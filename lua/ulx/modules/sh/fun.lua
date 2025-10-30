@@ -400,8 +400,6 @@ function ulx.jail( calling_ply, target_plys, seconds, reason, should_unjail )
 		if not should_unjail then
 			if ulx.getExclusive( v, calling_ply ) then
 				ULib.tsayError( calling_ply, ulx.getExclusive( v, calling_ply ), true )
-			elseif not jailableArea( v:GetPos() ) then
-				ULib.tsayError( calling_ply, v:Nick() .. " is not in an area where a jail can be placed!", true )
 			else
 				v.jailadmin = string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
 				v.jailreason = reason
@@ -467,9 +465,6 @@ function ulx.jailtp( calling_ply, target_ply, seconds, reason )
 	elseif not target_ply:Alive() then
 		ULib.tsayError( calling_ply, target_ply:Nick() .. " is dead!", true )
 		return
-	elseif not jailableArea( pos ) then
-		ULib.tsayError( calling_ply, "That is not an area where a jail can be placed!", true )
-		return
 	else
 		target_ply.ulx_prevpos = target_ply:GetPos()
 		target_ply.ulx_prevang = target_ply:EyeAngles()
@@ -533,17 +528,6 @@ local function jailCheck()
 	if remove_timer then
 		timer.Remove( "ULXJail" )
 	end
-end
-
-jailableArea = function( pos )
-	entList = ents.FindInBox( pos - Vector( 35, 35, 5 ), pos + Vector( 35, 35, 110 ) )
-	for i=1, #entList do
-		if entList[ i ]:GetClass() == "trigger_remove" then
-			return false
-		end
-	end
-
-	return true
 end
 
 local mdl1 = Model( "models/props_building_details/Storefront_Template001a_Bars.mdl" )

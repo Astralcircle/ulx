@@ -398,16 +398,11 @@ function ulx.jail( calling_ply, target_plys, seconds, reason, should_unjail )
 		local v = target_plys[ i ]
 
 		if not should_unjail then
-			if ulx.getExclusive( v, calling_ply ) then
-				ULib.tsayError( calling_ply, ulx.getExclusive( v, calling_ply ), true )
-			else
-				v.jailadmin = isstring(calling_ply) and calling_ply or string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
-				v.jailreason = reason
+			v.jailadmin = isstring(calling_ply) and calling_ply or string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
+			v.jailreason = reason
 
-				doJail( v, seconds )
-
-				table.insert( affected_plys, v )
-			end
+			doJail( v, seconds )
+			table.insert( affected_plys, v )
 		elseif v.jail then
 			v.jail.unjail()
 			v.jail = nil
@@ -458,29 +453,21 @@ function ulx.jailtp( calling_ply, target_ply, seconds, reason )
 	local tr = util.TraceEntity( t, target_ply )
 
 	local pos = tr.HitPos
+	target_ply.ulx_prevpos = target_ply:GetPos()
+	target_ply.ulx_prevang = target_ply:EyeAngles()
 
-	if ulx.getExclusive( target_ply, calling_ply ) then
-		ULib.tsayError( calling_ply, ulx.getExclusive( target_ply, calling_ply ), true )
-		return
-	elseif not target_ply:Alive() then
-		ULib.tsayError( calling_ply, target_ply:Nick() .. " is dead!", true )
-		return
-	else
-		target_ply.ulx_prevpos = target_ply:GetPos()
-		target_ply.ulx_prevang = target_ply:EyeAngles()
-
-		if target_ply:InVehicle() then
-			target_ply:ExitVehicle()
-		end
-
-		target_ply:SetPos( pos )
-		target_ply:SetLocalVelocity( Vector( 0, 0, 0 ) ) -- Stop!
-
-		target_ply.jailadmin = string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
-		target_ply.jailreason = reason
-
-		doJail( target_ply, seconds )
+	if target_ply:InVehicle() then
+		target_ply:ExitVehicle()
 	end
+
+	target_ply:SetPos( pos )
+	target_ply:SetLocalVelocity( Vector( 0, 0, 0 ) ) -- Stop!
+	target_ply:Spawn()
+
+	target_ply.jailadmin = string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
+	target_ply.jailreason = reason
+
+	doJail( target_ply, seconds )
 
 	local str = "#A teleported and jailed #T"
 

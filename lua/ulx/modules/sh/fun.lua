@@ -462,7 +462,6 @@ function ulx.jailtp( calling_ply, target_ply, seconds, reason )
 
 	target_ply:SetPos( pos )
 	target_ply:SetLocalVelocity( Vector( 0, 0, 0 ) ) -- Stop!
-	target_ply:Spawn()
 
 	target_ply.jailadmin = string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
 	target_ply.jailreason = reason

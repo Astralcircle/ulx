@@ -247,13 +247,8 @@ function ulx.logSpawn( txt )
 		ulx.logString( txt, true )
 	end
 
-	if logSpawnsEcho:GetInt() >= 0 and game.IsDedicated() then
-		Msg( txt .. "\n" )
-	end
-
 	if logSpawnsEcho:GetInt() == 1 then
 		echoToAdmins( txt )
-
 	elseif logSpawnsEcho:GetInt() == 2 then -- All players
 		ULib.console( _, txt )
 	end

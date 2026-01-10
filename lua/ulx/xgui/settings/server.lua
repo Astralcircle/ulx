@@ -1181,15 +1181,6 @@ plist:Add( xlib.makelabel{ label="Time (sec) for an admin to veto a mapchange" }
 plist:Add( xlib.makeslider{ label="<--->", min=0, max=300, repconvar="ulx_votemapVetotime" } )
 xgui.addSubModule( "ULX Player Votemap Settings", plist, nil, "server" )
 
--------------------------Reserved Slots--------------------------
-local plist = xlib.makelistlayout{ w=275, h=322, parent=xgui.null }
-plist:Add( xlib.makelabel{ label="Reserved Slots Settings" } )
-plist:Add( xlib.makecombobox{ repconvar="ulx_rslotsMode", isNumberConvar=true, choices={ "0 - Reserved slots disabled", "1 - Admins fill slots", "2 - Admins don't fill slots", "3 - Admins kick newest player" } } )
-plist:Add( xlib.makeslider{ label="Number of Reserved Slots", min=0, max=game.MaxPlayers(), repconvar="ulx_rslots" } )
-plist:Add( xlib.makecheckbox{ label="Reserved Slots Visible", repconvar="ulx_rslotsVisible" } )
-plist:Add( xlib.makelabel{ w=265, wordwrap=true, label="Reserved slots mode info:\n1 - Set a certain number of slots reserved for admins-- As admins join, they will fill up these slots.\n2 - Same as #1, but admins will not fill the slots-- they'll be freed when players leave.\n3 - Always keep 1 slot open for admins, and, if full, kick the user with the shortest connection time when an admin joins, thus keeping 1 slot open.\n\nReserved Slots Visible:\nWhen enabled, if there are no regular player slots available in your server, it will appear that the server is full. The major downside to this is that admins can't connect to the server using the 'find server' dialog. Instead, they have to go to console and use the command 'connect <ip>'" } )
-xgui.addSubModule( "ULX Reserved Slots", plist, nil, "server" )
-
 ------------------------Votekick/Voteban-------------------------
 local plist = xlib.makelistlayout{ w=275, h=322, parent=xgui.null }
 plist:Add( xlib.makelabel{ label="Votekick Settings" } )

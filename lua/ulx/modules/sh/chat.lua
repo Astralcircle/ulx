@@ -245,7 +245,7 @@ mute:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional }
 mute:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 mute:defaultAccess( ULib.ACCESS_ADMIN )
 mute:help( "Mutes target(s) so they are unable to chat." )
-mute:setOpposite( "ulx unmute", {_, _, 0, "", true}, "!unmute" )
+mute:setOpposite( "ulx unmute", {_, _, _, _, true}, "!unmute" )
 
 if SERVER then
 	local function gimpCheck( ply, strText )
@@ -316,7 +316,7 @@ gag:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional }
 gag:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 gag:defaultAccess( ULib.ACCESS_ADMIN )
 gag:help( "Gag target(s), disables microphone." )
-gag:setOpposite( "ulx ungag", {_, _, 0, "", true}, "!ungag" )
+gag:setOpposite( "ulx ungag", {_, _, _, _, true}, "!ungag" )
 
 local function gagHook( listener, talker )
 	if talker.ulx_gagged then

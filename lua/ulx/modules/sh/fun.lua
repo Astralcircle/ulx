@@ -439,7 +439,7 @@ jail:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional}
 jail:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 jail:defaultAccess( ULib.ACCESS_ADMIN )
 jail:help( "Jails target(s)." )
-jail:setOpposite( "ulx unjail", {_, _, _, true, ""}, "!unjail" )
+jail:setOpposite( "ulx unjail", {_, _, _, _, true}, "!unjail" )
 
 ------------------------------ Jail TP ------------------------------
 function ulx.jailtp( calling_ply, target_ply, seconds, reason )

@@ -480,6 +480,8 @@ function ulx.jailtp( calling_ply, target_ply, seconds, reason )
 
 		ulx.fancyLogAdmin( calling_ply, str, target_ply, reason )
 	end
+
+	hook.Run("ULX_USER_JAILED", target_ply, calling_ply, seconds, reason)
 end
 local jailtp = ulx.command( CATEGORY_NAME, "ulx jailtp", ulx.jailtp, "!jailtp" )
 jailtp:addParam{ type=ULib.cmds.PlayerArg }

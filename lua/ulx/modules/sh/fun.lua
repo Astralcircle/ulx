@@ -392,22 +392,14 @@ blind:setOpposite( "ulx unblind", {_, _, _, true}, "!unblind" )
 ------------------------------ Jail ------------------------------
 local doJail
 local jailableArea
-function ulx.jail( calling_ply, target_plys, seconds, reason, should_unjail )
-	local affected_plys = {}
-	for i=1, #target_plys do
-		local v = target_plys[ i ]
-
-		if not should_unjail then
-			v.jailadmin = isstring(calling_ply) and calling_ply or string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
-			v.jailreason = reason
-
-			doJail( v, seconds )
-			table.insert( affected_plys, v )
-		elseif v.jail then
-			v.jail.unjail()
-			v.jail = nil
-			table.insert( affected_plys, v )
-		end
+function ulx.jail( calling_ply, target_ply, seconds, reason, should_unjail )
+	if not should_unjail then
+		target_ply.jailadmin = isstring(calling_ply) and calling_ply or string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
+		target_ply.jailreason = reason
+		doJail( target_ply, seconds )
+	elseif target_ply.jail then
+		target_ply.jail.unjail()
+		target_ply.jail = nil
 	end
 
 	if not should_unjail then
@@ -420,25 +412,25 @@ function ulx.jail( calling_ply, target_plys, seconds, reason, should_unjail )
 				str = str .. " by reason: #s"
 			end
 
-			ulx.fancyLogAdmin( calling_ply, str, affected_plys, seconds, reason )
+			ulx.fancyLogAdmin( calling_ply, str, target_ply, seconds, reason )
 		else
 			if #reason > 0 then
 				str = str .. " by reason: #s"
 			end
 
-			ulx.fancyLogAdmin( calling_ply, str, affected_plys, reason )
+			ulx.fancyLogAdmin( calling_ply, str, target_ply, reason )
 		end
 	else
-		ulx.fancyLogAdmin( calling_ply, "#A unjailed #T", affected_plys )
+		ulx.fancyLogAdmin( calling_ply, "#A unjailed #T", target_ply )
 	end
 end
 local jail = ulx.command( CATEGORY_NAME, "ulx jail", ulx.jail, "!jail" )
-jail:addParam{ type=ULib.cmds.PlayersArg }
+jail:addParam{ type=ULib.cmds.PlayerArg }
 jail:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
 jail:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional}
 jail:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 jail:defaultAccess( ULib.ACCESS_ADMIN )
-jail:help( "Jails target(s)." )
+jail:help( "Jails target." )
 jail:setOpposite( "ulx unjail", {_, _, _, _, true}, "!unjail" )
 
 ------------------------------ Jail TP ------------------------------

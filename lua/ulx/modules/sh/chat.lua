@@ -228,8 +228,11 @@ function ulx.mute( calling_ply, target_ply, seconds, reason, should_unmute )
 
 			ulx.fancyLogAdmin( calling_ply, str, target_ply, reason )
 		end
+
+		hook.Run("ULX_USER_MUTED", target_ply, calling_ply, seconds, reason)
 	else
 		ulx.fancyLogAdmin( calling_ply, "#A unmuted #T", target_ply )
+		hook.Run("ULX_USER_UNMUTED", target_ply, calling_ply)
 	end
 end
 local mute = ulx.command( CATEGORY_NAME, "ulx mute", ulx.mute, "!mute" )
@@ -291,8 +294,11 @@ function ulx.gag( calling_ply, target_ply, seconds, reason, should_ungag )
 
 			ulx.fancyLogAdmin( calling_ply, str, target_ply, reason )
 		end
+
+		hook.Run("ULX_USER_GAGGED", target_ply, calling_ply, seconds, reason)
 	else
 		ulx.fancyLogAdmin( calling_ply, "#A ungagged #T", target_ply )
+		hook.Run("ULX_USER_UNGAGGED", target_ply, calling_ply)
 	end
 end
 local gag = ulx.command( CATEGORY_NAME, "ulx gag", ulx.gag, "!gag" )

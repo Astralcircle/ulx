@@ -420,8 +420,11 @@ function ulx.jail( calling_ply, target_ply, seconds, reason, should_unjail )
 
 			ulx.fancyLogAdmin( calling_ply, str, target_ply, reason )
 		end
+
+		hook.Run("ULX_USER_JAILED", target_ply, calling_ply, seconds, reason)
 	else
 		ulx.fancyLogAdmin( calling_ply, "#A unjailed #T", target_ply )
+		hook.Run("ULX_USER_UNJAILED", target_ply, calling_ply)
 	end
 end
 local jail = ulx.command( CATEGORY_NAME, "ulx jail", ulx.jail, "!jail" )

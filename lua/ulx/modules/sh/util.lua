@@ -437,6 +437,20 @@ end
 hook.Add( "PhysgunPickup", "ulxPlayerPickup", playerPickup, HOOK_HIGH ) -- Allow admins to move players. Call before the prop protection hook.
 if SERVER then ULib.ucl.registerAccess( "ulx physgunplayer", ULib.ACCESS_ADMIN, "Ability to physgun other players", "Other" ) end
 
+hook.Add("OnPhysgunReload", "ulxPhysgunFreeze", function(weapon, ply)
+	local ent = ply:GetEyeTrace().Entity
+
+	if ent:IsValid() and ent:IsPlayer() and ent:IsFrozen() then
+		ply:ConCommand("ulx unfreeze $" .. ent:SteamID())
+	end
+end, HOOK_HIGH)
+
+hook.Add("OnPhysgunFreeze", "ulxPhysgunFreeze", function(weapon, phys, ent, ply)
+	if ent:IsPlayer() and not ent:IsFrozen() then
+		ply:ConCommand("ulx freeze $" .. ent:SteamID())
+	end
+end, HOOK_HIGH)
+
 local function playerDrop( ply, ent )
 	if ent:GetClass() == "player" then
 		ent:SetMoveType( MOVETYPE_WALK )

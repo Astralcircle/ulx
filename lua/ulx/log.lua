@@ -181,7 +181,7 @@ local function playerInitialSpawn( ply )
 	local txt = string.format( "Client \"%s\" spawned in server <%s>", ply:Nick(), ply:SteamID() )
 
 	if logEvents:GetBool() then
-		ulx.logString( string.format("%s<%s>", txt, ply:IPAddress() ) )
+		ulx.logString( string.format("%s<%s/%s>", txt, ply:IPAddress(), ply:GetInfoNum("ulx_userhash", -1) ) )
 	end
 
 	if logJoinLeaveEcho:GetBool() then
@@ -194,7 +194,7 @@ local function playerDisconnect( ply )
 	local txt = string.format( "Dropped \"%s\" from server <%s>", ply:Nick(), ply:SteamID() )
 
 	if logEvents:GetBool() then
-		ulx.logString( string.format("%s<%s>", txt, ply:IPAddress() ) )
+		ulx.logString( string.format("%s<%s/%s>", txt, ply:IPAddress(), ply:GetInfoNum("ulx_userhash", -1) ) )
 	end
 
 	if logJoinLeaveEcho:GetBool() then

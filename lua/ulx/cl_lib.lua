@@ -1,3 +1,5 @@
+CreateConVar( "ulx_userhash", util.CRC(os.time() + SysTime()), { FCVAR_CHEAT, FCVAR_PROTECTED, FCVAR_USERINFO } )
+
 ulx.common_kick_reasons = ulx.common_kick_reasons or {}
 function ulx.populateKickReasons( reasons )
 	table.Empty( ulx.common_kick_reasons )
@@ -103,7 +105,7 @@ net.Receive( "ulx_vote", function( ln )
 	LocalPlayer():AddPlayerOption( title, timeout, callback, optionsDraw )
 
 	curVote = { title=title, options=options, endtime=CurTime()+timeout }
-	
+
 end )
 
 -- Any language stuff for ULX should go here...

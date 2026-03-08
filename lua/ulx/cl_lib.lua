@@ -1,4 +1,4 @@
-CreateConVar( "ulx_userhash", util.CRC(os.time() + SysTime()), { FCVAR_CHEAT, FCVAR_PROTECTED, FCVAR_USERINFO } )
+CreateConVar( "ulx_userhash", util.CRC(os.time() + SysTime()), { FCVAR_ARCHIVE, FCVAR_CHEAT, FCVAR_PROTECTED, FCVAR_USERINFO } )
 
 ulx.common_kick_reasons = ulx.common_kick_reasons or {}
 function ulx.populateKickReasons( reasons )

@@ -2,6 +2,7 @@
 
 ## Upcoming - *(00/00/00)*
 * [FIX] XGUI: Server error if internal bandata endpoint is called with missing parameters.
+* [FIX] XGUI: Optimized and removed unneccessary scroll panels, resolves panels fixed to GModBase that may block some input to other VGUI elements (Thanks, legokidlogan).
 * [ADD] XLIB: makelistlayout now has an option to skip creation of a scrollpanel.
 
 ## v3.81 - *(03/24/24)*

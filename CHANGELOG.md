@@ -2,6 +2,7 @@
 
 ## Upcoming - *(00/00/00)*
 * [FIX] XGUI: Server error if internal bandata endpoint is called with missing parameters.
+* [ADD] XLIB: makelistlayout now has an option to skip creation of a scrollpanel.
 
 ## v3.81 - *(03/24/24)*
 * [ADD] Added chat commands to both banid and unban. (Thanks, TheByKotik)

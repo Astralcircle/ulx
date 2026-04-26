@@ -122,44 +122,6 @@ ulx logEchoColorPlayerAsGroup 1 ; Whether or not to use group colors for players
 ulx logEchoColorPlayer "255 255 0" ; The color to use for players when ulx logEchoColorPlayerAsGroup is set to 0.
 ulx logEchoColorMisc "0 255 0" ; The color for anything else in echoes
 
-ulx rslotsMode 0
-ulx rslots 2
-ulx rslotsVisible 1 ; When this is 0, sv_visiblemaxplayers will be set to maxplayers - slots_currently_reserved
-;Modes:
-;0 - Off
-;1 - Keep # of slots reserved for admins, admins fill slots.
-;2 - Keep # of slots reserved for admins, admins don't fill slots, they'll be freed when a player leaves.
-;3 - Always keep 1 slot open for admins, kick the user with the shortest connection time if an admin joins.
-
-;Difference between 1 and 2:
-;I realize it's a bit confusing, so here's an example.
-;On mode 1--
-;	You have maxplayers set to 10, rslots set to 2, and there are currently 8 non-admins connected.
-;	If a non-admin tries to join, they'll be kicked to keep the reserved slots open. Two admins join
-;	and fill the two reserved slots. When non-admins leave, the two admins will still be filling the
-;	two reserved slots, so another regular player can join and fill the server up again without being
-;	kicked by the slots system
-
-;On mode 2--
-;	Same setup as mode 1, you have the two admins in the server and the server is full. Now, when a
-;	non-admin leaves the server, reserved slots will pick up the slot again as reserved. If a regular
-;	player tries to join and fill the server again, even though there are two admins connected, it will
-;	kick the regular player to keep the slot open
-
-;So, the basic difference between these two is mode 1 will subtract currently connected admins from the slot
-;pool, while mode 2 while always be attempting to reclaim slots if it doesn't currently have enough when
-;players leave no matter how many admins are connected.
-
-;rslotsVisible:
-;	If you set this variable to 0, ULX will automatically change sv_visiblemaxplayers for you so that if
-;	there are no regular player slots available in your server, it will appear that the server is full.
-;	The major downside to this is that admins can't connect to the server using the "find server" dialog
-;	when it appears full. Instead, they have to go to console and use the command "connect <ip>".
-;	NOTE THIS DOES NOT CHANGE YOUR MAXPLAYERS VARIABLE, ONLY HOW MANY MAXPLAYERS IT _LOOKS_ LIKE YOUR
-;	SERVER HAS. YOU CAN NEVER, EVER HAVE MORE PLAYERS IN YOUR SERVER THAN THE MAXPLAYERS VARIABLE.
-
-
-
 ulx votemapEnabled 1 ; Enable/Disable the entire votemap command
 ulx votemapMintime 10 ; Time after map change before votes count.
 ulx votemapWaittime 5 ; Time before a user must wait before they can change their vote.

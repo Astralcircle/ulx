@@ -356,7 +356,7 @@ end
 function ulx.blind( calling_ply, target_plys, amount, should_unblind )
 	for i=1, #target_plys do
 		local v = target_plys[ i ]
-		
+
 		net.Start( "ulx_blind" )
 			net.WriteBool( not should_unblind )
 			net.WriteInt( amount, 16 )
@@ -392,48 +392,52 @@ blind:setOpposite( "ulx unblind", {_, _, _, true}, "!unblind" )
 ------------------------------ Jail ------------------------------
 local doJail
 local jailableArea
-function ulx.jail( calling_ply, target_plys, seconds, should_unjail )
-	local affected_plys = {}
-	for i=1, #target_plys do
-		local v = target_plys[ i ]
-
-		if not should_unjail then
-			if ulx.getExclusive( v, calling_ply ) then
-				ULib.tsayError( calling_ply, ulx.getExclusive( v, calling_ply ), true )
-			elseif not jailableArea( v:GetPos() ) then
-				ULib.tsayError( calling_ply, v:Nick() .. " is not in an area where a jail can be placed!", true )
-			else
-				doJail( v, seconds )
-
-				table.insert( affected_plys, v )
-			end
-		elseif v.jail then
-			v.jail.unjail()
-			v.jail = nil
-			table.insert( affected_plys, v )
-		end
+function ulx.jail( calling_ply, target_ply, seconds, reason, should_unjail )
+	if not should_unjail then
+		target_ply.jailadmin = isstring(calling_ply) and calling_ply or string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
+		target_ply.jailreason = reason
+		doJail( target_ply, seconds )
+	elseif target_ply.jail then
+		target_ply.jail.unjail()
+		target_ply.jail = nil
 	end
 
 	if not should_unjail then
 		local str = "#A jailed #T"
+
 		if seconds > 0 then
 			str = str .. " for #i seconds"
+
+			if #reason > 0 then
+				str = str .. " by reason: #s"
+			end
+
+			ulx.fancyLogAdmin( calling_ply, str, target_ply, seconds, reason )
+		else
+			if #reason > 0 then
+				str = str .. " by reason: #s"
+			end
+
+			ulx.fancyLogAdmin( calling_ply, str, target_ply, reason )
 		end
-		ulx.fancyLogAdmin( calling_ply, str, affected_plys, seconds )
+
+		hook.Run("ULX_USER_JAILED", target_ply, calling_ply, seconds, reason)
 	else
-		ulx.fancyLogAdmin( calling_ply, "#A unjailed #T", affected_plys )
+		ulx.fancyLogAdmin( calling_ply, "#A unjailed #T", target_ply )
+		hook.Run("ULX_USER_UNJAILED", target_ply, calling_ply)
 	end
 end
 local jail = ulx.command( CATEGORY_NAME, "ulx jail", ulx.jail, "!jail" )
-jail:addParam{ type=ULib.cmds.PlayersArg }
+jail:addParam{ type=ULib.cmds.PlayerArg }
 jail:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
+jail:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional}
 jail:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 jail:defaultAccess( ULib.ACCESS_ADMIN )
-jail:help( "Jails target(s)." )
-jail:setOpposite( "ulx unjail", {_, _, _, true}, "!unjail" )
+jail:help( "Jails target." )
+jail:setOpposite( "ulx unjail", {_, _, _, _, true}, "!unjail" )
 
 ------------------------------ Jail TP ------------------------------
-function ulx.jailtp( calling_ply, target_ply, seconds )
+function ulx.jailtp( calling_ply, target_ply, seconds, reason )
 	local t = {}
 	t.start = calling_ply:GetPos() + Vector( 0, 0, 32 ) -- Move them up a bit so they can travel across the ground
 	t.endpos = calling_ply:GetPos() + calling_ply:EyeAngles():Forward() * 16384
@@ -444,39 +448,45 @@ function ulx.jailtp( calling_ply, target_ply, seconds )
 	local tr = util.TraceEntity( t, target_ply )
 
 	local pos = tr.HitPos
+	target_ply.ulx_prevpos = target_ply:GetPos()
+	target_ply.ulx_prevang = target_ply:EyeAngles()
 
-	if ulx.getExclusive( target_ply, calling_ply ) then
-		ULib.tsayError( calling_ply, ulx.getExclusive( target_ply, calling_ply ), true )
-		return
-	elseif not target_ply:Alive() then
-		ULib.tsayError( calling_ply, target_ply:Nick() .. " is dead!", true )
-		return
-	elseif not jailableArea( pos ) then
-		ULib.tsayError( calling_ply, "That is not an area where a jail can be placed!", true )
-		return
-	else
-		target_ply.ulx_prevpos = target_ply:GetPos()
-		target_ply.ulx_prevang = target_ply:EyeAngles()
-
-		if target_ply:InVehicle() then
-			target_ply:ExitVehicle()
-		end
-
-		target_ply:SetPos( pos )
-		target_ply:SetLocalVelocity( Vector( 0, 0, 0 ) ) -- Stop!
-
-		doJail( target_ply, seconds )
+	if target_ply:InVehicle() then
+		target_ply:ExitVehicle()
 	end
+
+	target_ply:SetPos( pos )
+	target_ply:SetLocalVelocity( Vector( 0, 0, 0 ) ) -- Stop!
+
+	target_ply.jailadmin = string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
+	target_ply.jailreason = reason
+
+	doJail( target_ply, seconds )
 
 	local str = "#A teleported and jailed #T"
+
 	if seconds > 0 then
 		str = str .. " for #i seconds"
+
+		if #reason > 0 then
+			str = str .. " by reason: #s"
+		end
+
+		ulx.fancyLogAdmin( calling_ply, str, target_ply, seconds, reason )
+	else
+		if #reason > 0 then
+			str = str .. " by reason: #s"
+		end
+
+		ulx.fancyLogAdmin( calling_ply, str, target_ply, reason )
 	end
-	ulx.fancyLogAdmin( calling_ply, str, target_ply, seconds )
+
+	hook.Run("ULX_USER_JAILED", target_ply, calling_ply, seconds, reason)
 end
 local jailtp = ulx.command( CATEGORY_NAME, "ulx jailtp", ulx.jailtp, "!jailtp" )
 jailtp:addParam{ type=ULib.cmds.PlayerArg }
 jailtp:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
+jailtp:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional}
 jailtp:defaultAccess( ULib.ACCESS_ADMIN )
 jailtp:help( "Teleports, then jails target(s)." )
 
@@ -503,17 +513,6 @@ local function jailCheck()
 	end
 end
 
-jailableArea = function( pos )
-	entList = ents.FindInBox( pos - Vector( 35, 35, 5 ), pos + Vector( 35, 35, 110 ) )
-	for i=1, #entList do
-		if entList[ i ]:GetClass() == "trigger_remove" then
-			return false
-		end
-	end
-
-	return true
-end
-
 local mdl1 = Model( "models/props_building_details/Storefront_Template001a_Bars.mdl" )
 local jail = {
 	{ pos = Vector( 0, 0, -5 ), ang = Angle( 90, 0, 0 ), mdl=mdl1 },
@@ -529,6 +528,8 @@ doJail = function( v, seconds )
 	if v.jail then -- They're already jailed
 		v.jail.unjail()
 	end
+
+	v:ChatPrint("ВНИМАНИЕ! За выход из джайла вы получите авто-бан на 7 дней!")
 
 	if v:InVehicle() then
 		local vehicle = v:GetParent()

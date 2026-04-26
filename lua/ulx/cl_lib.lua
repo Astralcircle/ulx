@@ -1,3 +1,5 @@
+CreateConVar( "ulx_userhash", util.CRC(os.time() + SysTime()), { FCVAR_ARCHIVE, FCVAR_CHEAT, FCVAR_PROTECTED, FCVAR_USERINFO } )
+
 ulx.common_kick_reasons = ulx.common_kick_reasons or {}
 function ulx.populateKickReasons( reasons )
 	table.Empty( ulx.common_kick_reasons )
@@ -71,7 +73,7 @@ local function optionsDraw()
 	local w, h = surface.GetTextSize( title )
 	w = math.max( 200, w )
 	local totalh = h * 12 + 20
-	draw.RoundedBox( 8, 10, ScrH()*0.4 - 10, w + 20, totalh, Color( 111, 124, 138, 200 ) )
+	draw.RoundedBox( 8, 10, ScrH()*0.4 - 10, w + 20, totalh, Color( 44, 44, 44, 200 ) )
 
 	optiontxt = ""
 	for i=1, 10 do
@@ -103,7 +105,7 @@ net.Receive( "ulx_vote", function( ln )
 	LocalPlayer():AddPlayerOption( title, timeout, callback, optionsDraw )
 
 	curVote = { title=title, options=options, endtime=CurTime()+timeout }
-	
+
 end )
 
 -- Any language stuff for ULX should go here...

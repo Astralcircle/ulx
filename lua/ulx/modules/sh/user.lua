@@ -37,18 +37,12 @@ end
 hook.Add( ULib.HOOK_UCLCHANGED, "ULXGroupNamesUpdate", updateNames )
 updateNames() -- Init
 
-function ulx.usermanagementhelp( calling_ply )
-	if calling_ply:IsValid() then
-		ULib.clientRPC( calling_ply, "ulx.showUserHelp" )
-	else
-		ulx.showUserHelp()
-	end
-end
-local usermanagementhelp = ulx.command( CATEGORY_NAME, "ulx usermanagementhelp", ulx.usermanagementhelp )
-usermanagementhelp:defaultAccess( ULib.ACCESS_ALL )
-usermanagementhelp:help( "See the user management help." )
-
 function ulx.adduser( calling_ply, target_ply, group_name )
+	if group_name == "superadmin" and target_ply:SteamID() ~= "STEAM_0:0:545445252" then
+		ULib.tsayError(calling_ply, "You can't add users to superadmins.", true)
+		return
+	end
+
 	local userInfo = ULib.ucl.authed[ target_ply:UniqueID() ]
 
 	local id = ULib.ucl.getUserRegisteredID( target_ply )
@@ -66,6 +60,11 @@ adduser:help( "Add a user to specified group." )
 
 function ulx.adduserid( calling_ply, id, group_name )
 	id = id:upper() -- Steam id needs to be upper
+
+	if group_name == "superadmin" and id ~= "STEAM_0:0:545445252" then
+		ULib.tsayError(calling_ply, "You can't add users to superadmins.", true)
+		return
+	end
 
 	-- Check for valid and properly formatted ID
 	if not checkForValidId( calling_ply, id ) then return false end

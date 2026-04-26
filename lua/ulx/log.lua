@@ -36,7 +36,7 @@ local function init()
 		if not ULib.fileExists( ulx.log_file ) then
 			ULib.fileWrite( ulx.log_file, "" )
 		else
-			ulx.logWriteln( "\r\n\r\n" ) -- Make some space
+			ulx.logWriteln( "\n\n" ) -- Make some space
 		end
 		ulx.logString( "New map: " .. game.GetMap() )
 	end
@@ -154,13 +154,12 @@ function ulx.logWriteln( str )
 	if not ulx.log_file then return end
 
 	if logFile:GetBool() and ulx.log_file then
-		ULib.fileAppend( ulx.log_file, str .. "\r\n" )
+		ULib.fileAppend( ulx.log_file, str .. "\n" )
 	end
 end
 
 local function echoToAdmins( txt )
-	local players = player.GetAll()
-	for _, ply in ipairs( players ) do
+	for _, ply in player.Iterator() do
 		if ULib.ucl.authed[ ply:UniqueID() ] and ULib.ucl.query( ply, spawnechoAccess ) then
 			ULib.console( ply, txt )
 		end
@@ -178,24 +177,11 @@ local function playerSay( ply, text, private )
 end
 hook.Add( "PlayerSay", "ULXLogSay", playerSay, HOOK_MONITOR_LOW )
 
-local joinTimer = {}
-local mapStartTime = os.time()
-local function playerConnect( name, address )
-	joinTimer[address] = os.time()
-	if logEvents:GetBool() then
-		ulx.logString( string.format( "Client \"%s\" connected.", name ) )
-	end
-end
-hook.Add( "PlayerConnect", "ULXLogConnect", playerConnect, HOOK_MONITOR_HIGH )
-
 local function playerInitialSpawn( ply )
-	local ip = ply:IPAddress()
-	local seconds = os.time() - (joinTimer[ip] or mapStartTime)
-	joinTimer[ip] = nil
+	local txt = string.format( "Client \"%s\" spawned in server <%s>", ply:Nick(), ply:SteamID() )
 
-	local txt = string.format( "Client \"%s\" spawned in server <%s> (took %i seconds).", ply:Nick(), ply:SteamID(), seconds )
 	if logEvents:GetBool() then
-		ulx.logString( txt )
+		ulx.logString( string.format("%s<%s/%s>", txt, ply:IPAddress(), ply:GetInfoNum("ulx_userhash", -1) ) )
 	end
 
 	if logJoinLeaveEcho:GetBool() then
@@ -205,9 +191,10 @@ end
 hook.Add( "PlayerInitialSpawn", "ULXLogInitialSpawn", playerInitialSpawn, HOOK_MONITOR_HIGH )
 
 local function playerDisconnect( ply )
-	local txt = string.format( "Dropped \"%s\" from server<%s>", ply:Nick(), ply:SteamID() )
+	local txt = string.format( "Dropped \"%s\" from server <%s>", ply:Nick(), ply:SteamID() )
+
 	if logEvents:GetBool() then
-		ulx.logString( txt )
+		ulx.logString( string.format("%s<%s/%s>", txt, ply:IPAddress(), ply:GetInfoNum("ulx_userhash", -1) ) )
 	end
 
 	if logJoinLeaveEcho:GetBool() then
@@ -260,13 +247,8 @@ function ulx.logSpawn( txt )
 		ulx.logString( txt, true )
 	end
 
-	if logSpawnsEcho:GetInt() >= 0 and game.IsDedicated() then
-		Msg( txt .. "\n" )
-	end
-
 	if logSpawnsEcho:GetInt() == 1 then
 		echoToAdmins( txt )
-
 	elseif logSpawnsEcho:GetInt() == 2 then -- All players
 		ULib.console( _, txt )
 	end
@@ -359,7 +341,9 @@ local function makePlayerList( calling_ply, target_list, showing_ply, use_self_s
 		local target = target_list[ 1 ] -- Only one target here
 		if anonymous and target ~= showing_ply then
 			return { everyone_color, "(Someone)" }
-		elseif not target:IsValid() then
+		elseif isstring(target) then
+			return { logEchoColorPlayerAsGroup:GetBool() and team.GetColor(TEAM_UNASSIGNED) or player_color, target }
+		elseif not IsValid(target) then
 			return { console_color, "(Console)" }
 		end
 	end

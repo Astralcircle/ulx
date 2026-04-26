@@ -190,29 +190,59 @@ gimp:help( "Gimps target(s) so they are unable to chat normally." )
 gimp:setOpposite( "ulx ungimp", {_, _, true}, "!ungimp" )
 
 ------------------------------ Mute ------------------------------
-function ulx.mute( calling_ply, target_plys, should_unmute )
-	for i=1, #target_plys do
-		local v = target_plys[ i ]
-		if should_unmute then
-			v.gimp = nil
-		else
-			v.gimp = ID_MUTE
-		end
-		v:SetNWBool("ulx_muted", not should_unmute)
+function ulx.mute( calling_ply, target_ply, seconds, reason, should_unmute )
+	if should_unmute then
+		target_ply.gimp = nil
+		timer.Remove("ULXMute_" .. target_ply:UserID())
+	else
+		target_ply.gimp = ID_MUTE
+	end
+
+	target_ply:SetNWBool("ulx_muted", not should_unmute)
+
+	if not should_unmute and seconds > 0 then
+		timer.Create("ULXMute_" .. target_ply:UserID(), seconds, 1, function()
+			if target_ply:IsValid() then
+				target_ply.gimp = nil
+				target_ply:SetNWBool("ulx_muted", false)
+				target_ply:ChatPrint("Вы размучены")
+			end
+		end)
 	end
 
 	if not should_unmute then
-		ulx.fancyLogAdmin( calling_ply, "#A muted #T", target_plys )
+		local str = "#A muted #T"
+
+		if seconds > 0 then
+			str = str .. " for #i seconds"
+
+			if #reason > 0 then
+				str = str .. " by reason: #s"
+			end
+
+			ulx.fancyLogAdmin( calling_ply, str, target_ply, seconds, reason )
+		else
+			if #reason > 0 then
+				str = str .. " by reason: #s"
+			end
+
+			ulx.fancyLogAdmin( calling_ply, str, target_ply, reason )
+		end
+
+		hook.Run("ULX_USER_MUTED", target_ply, calling_ply, seconds, reason)
 	else
-		ulx.fancyLogAdmin( calling_ply, "#A unmuted #T", target_plys )
+		ulx.fancyLogAdmin( calling_ply, "#A unmuted #T", target_ply )
+		hook.Run("ULX_USER_UNMUTED", target_ply, calling_ply)
 	end
 end
 local mute = ulx.command( CATEGORY_NAME, "ulx mute", ulx.mute, "!mute" )
-mute:addParam{ type=ULib.cmds.PlayersArg }
+mute:addParam{ type=ULib.cmds.PlayerArg }
+mute:addParam{ type=ULib.cmds.NumArg, min=0, max=1800, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
+mute:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional }
 mute:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 mute:defaultAccess( ULib.ACCESS_ADMIN )
-mute:help( "Mutes target(s) so they are unable to chat." )
-mute:setOpposite( "ulx unmute", {_, _, true}, "!unmute" )
+mute:help( "Mutes target so they are unable to chat." )
+mute:setOpposite( "ulx unmute", {_, _, _, _, true}, "!unmute" )
 
 if SERVER then
 	local function gimpCheck( ply, strText )
@@ -226,26 +256,59 @@ if SERVER then
 end
 
 ------------------------------ Gag ------------------------------
-function ulx.gag( calling_ply, target_plys, should_ungag )
-	local players = player.GetAll()
-	for i=1, #target_plys do
-		local v = target_plys[ i ]
-		v.ulx_gagged = not should_ungag
-		v:SetNWBool("ulx_gagged", v.ulx_gagged)
+function ulx.gag( calling_ply, target_ply, seconds, reason, should_ungag )
+	if should_ungag then
+		target_ply.ulx_gagged = false
+		target_ply:SetNWBool("ulx_gagged", false)
+		timer.Remove("ULXGag_" .. target_ply:UserID())
+	else
+		target_ply.ulx_gagged = true
+		target_ply:SetNWBool("ulx_gagged", true)
+	end
+
+	if not should_ungag and seconds > 0 then
+		timer.Create("ULXGag_" .. target_ply:UserID(), seconds, 1, function()
+			if target_ply:IsValid() then
+				target_ply.ulx_gagged = false
+				target_ply:SetNWBool("ulx_gagged", false)
+				target_ply:ChatPrint("Вы разгаганы")
+			end
+		end)
 	end
 
 	if not should_ungag then
-		ulx.fancyLogAdmin( calling_ply, "#A gagged #T", target_plys )
+		local str = "#A gagged #T"
+
+		if seconds > 0 then
+			str = str .. " for #i seconds"
+
+			if #reason > 0 then
+				str = str .. " by reason: #s"
+			end
+
+			ulx.fancyLogAdmin( calling_ply, str, target_ply, seconds, reason )
+		else
+			if #reason > 0 then
+				str = str .. " by reason: #s"
+			end
+
+			ulx.fancyLogAdmin( calling_ply, str, target_ply, reason )
+		end
+
+		hook.Run("ULX_USER_GAGGED", target_ply, calling_ply, seconds, reason)
 	else
-		ulx.fancyLogAdmin( calling_ply, "#A ungagged #T", target_plys )
+		ulx.fancyLogAdmin( calling_ply, "#A ungagged #T", target_ply )
+		hook.Run("ULX_USER_UNGAGGED", target_ply, calling_ply)
 	end
 end
 local gag = ulx.command( CATEGORY_NAME, "ulx gag", ulx.gag, "!gag" )
-gag:addParam{ type=ULib.cmds.PlayersArg }
+gag:addParam{ type=ULib.cmds.PlayerArg }
+gag:addParam{ type=ULib.cmds.NumArg, min=0, max=1800, default=0, hint="seconds, 0 is forever", ULib.cmds.round, ULib.cmds.optional }
+gag:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional }
 gag:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 gag:defaultAccess( ULib.ACCESS_ADMIN )
-gag:help( "Gag target(s), disables microphone." )
-gag:setOpposite( "ulx ungag", {_, _, true}, "!ungag" )
+gag:help( "Gag target, disables microphone." )
+gag:setOpposite( "ulx ungag", {_, _, _, _, true}, "!ungag" )
 
 local function gagHook( listener, talker )
 	if talker.ulx_gagged then
@@ -256,6 +319,8 @@ hook.Add( "PlayerCanHearPlayersVoice", "ULXGag", gagHook )
 
 -- Anti-spam stuff
 if SERVER then
+	util.AddNetworkString("ULX_CustomMe")
+
 	local chattime_cvar = ulx.convar( "chattime", "1.5", "<time> - Players can only chat every x seconds (anti-spam). 0 to disable.", ULib.ACCESS_ADMIN )
 	local function playerSay( ply )
 		if not ply.lastChatTime then ply.lastChatTime = 0 end
@@ -278,17 +343,21 @@ if SERVER then
 		if ply.gimp or meChatEnabled == 0 or (meChatEnabled ~= 2 and GAMEMODE.Name ~= "Sandbox") then return end -- Don't mess
 
 		if strText:sub( 1, 4 ) == "/me " then
-			strText = string.format( "*** %s %s", ply:Nick(), strText:sub( 5 ) )
-			if not bTeam then
-				ULib.tsay( _, strText )
-			else
-				strText = "(TEAM) " .. strText
-				local teamid = ply:Team()
-				local players = team.GetPlayers( teamid )
-				for _, ply2 in ipairs( players ) do
-					ULib.tsay( ply2, strText )
+			strText = ec_markup.GetText(strText:sub( 4, 128 ))
+
+			net.Start("ULX_CustomMe")
+			net.WritePlayer(ply)
+			net.WriteString(strText)
+
+			local plys = {}
+
+			for _, v in ipairs(ents.FindInSphere(ply:GetPos(), ply:GetInfoNum("easychat_local_msg_distance", 512))) do
+				if v:IsPlayer() then
+					table.insert(plys, v)
 				end
 			end
+
+			net.Send(plys)
 
 			if game.IsDedicated() then
 				Msg( strText .. "\n" ) -- Log to console
@@ -302,6 +371,13 @@ if SERVER then
 
 	end
 	hook.Add( "PlayerSay", "ULXMeCheck", meCheck, HOOK_LOW ) -- Extremely low priority
+else
+	net.Receive("ULX_CustomMe", function()
+		local sender = net.ReadPlayer()
+		if not sender:IsValid() then return end
+
+		chat.AddText(sender, net.ReadString())
+	end)
 end
 
 local function showWelcome( ply )

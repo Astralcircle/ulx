@@ -146,8 +146,8 @@ function ulx.logString( str, log_to_main )
 	if log_to_main then
 		ServerLog( "[ULX] " .. str .. "\n" )
 	end
-	local date = os.date( "*t" )
-	ulx.logWriteln( string.format( "[%02i:%02i:%02i] ", date.hour, date.min, date.sec ) .. str )
+
+	ulx.logWriteln( os.date( "[%H:%M:%S] " ) .. str )
 end
 
 function ulx.logWriteln( str )

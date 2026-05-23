@@ -244,7 +244,7 @@ if SERVER then
 	local function gimpCheck( ply, strText )
 		if ply.gimp == ID_MUTE then
 			local timer_name = "ULXMute_" .. ply:UserID()
-			ply:ChatPrint(timer.Exists(timer_name) and "Вы замучены, до окончания мута осталось " .. timer.TimeLeft(timer_name) .. " секунд" or "Вы замучены")
+			ply:ChatPrint(timer.Exists(timer_name) and "Вы замучены, до окончания мута осталось " .. math.ceil(timer.TimeLeft(timer_name)) .. " секунд" or "Вы замучены")
 
 			return ""
 		end

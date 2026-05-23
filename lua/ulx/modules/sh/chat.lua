@@ -265,7 +265,7 @@ function ulx.gag( calling_ply, target_ply, seconds, reason, should_ungag )
 		timer.Remove("ULXGag_" .. target_ply:UserID())
 	else
 		target_ply.ulx_gagged = true
-		target_ply:SetNW2Int("ulx_gagged_time", CurTime() + seconds)
+		target_ply:SetNW2Int("ulx_gagged_time", seconds > 0 and CurTime() + seconds or 0)
 	end
 
 	if not should_ungag and seconds > 0 then

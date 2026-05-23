@@ -529,7 +529,7 @@ doJail = function( v, seconds )
 		v.jail.unjail()
 	end
 
-	v:SetNW2Int("ulx_jail_time", CurTime() + seconds)
+	v:SetNW2Int("ulx_jail_time", seconds > 0 and CurTime() + seconds or 0)
 
 	if v:InVehicle() then
 		local vehicle = v:GetParent()

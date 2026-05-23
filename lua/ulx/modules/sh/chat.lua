@@ -3,7 +3,7 @@ CATEGORY_NAME = "Chat"
 
 ------------------------------ Psay ------------------------------
 function ulx.psay( calling_ply, target_ply, message )
-	if calling_ply:GetNWBool( "ulx_muted", false ) then
+	if calling_ply.gimp == 2 then -- ID_MUTE
 		ULib.tsayError( calling_ply, "You are muted, and therefore cannot speak! Use asay for admin chat if urgent.", true )
 		return
 	end
@@ -173,7 +173,6 @@ function ulx.gimp( calling_ply, target_plys, should_ungimp )
 		else
 			v.gimp = ID_GIMP
 		end
-		v:SetNWBool("ulx_gimped", not should_ungimp)
 	end
 
 	if not should_ungimp then
@@ -198,13 +197,10 @@ function ulx.mute( calling_ply, target_ply, seconds, reason, should_unmute )
 		target_ply.gimp = ID_MUTE
 	end
 
-	target_ply:SetNWBool("ulx_muted", not should_unmute)
-
 	if not should_unmute and seconds > 0 then
 		timer.Create("ULXMute_" .. target_ply:UserID(), seconds, 1, function()
 			if target_ply:IsValid() then
 				target_ply.gimp = nil
-				target_ply:SetNWBool("ulx_muted", nil)
 				target_ply:ChatPrint("Вы размучены")
 			end
 		end)
@@ -265,12 +261,10 @@ end
 function ulx.gag( calling_ply, target_ply, seconds, reason, should_ungag )
 	if should_ungag then
 		target_ply.ulx_gagged = false
-		target_ply:SetNWBool("ulx_gagged", nil)
 		target_ply:SetNWInt("ulx_gagged_time", nil)
 		timer.Remove("ULXGag_" .. target_ply:UserID())
 	else
 		target_ply.ulx_gagged = true
-		target_ply:SetNWBool("ulx_gagged", true)
 		target_ply:SetNWInt("ulx_gagged_time", CurTime() + seconds)
 	end
 
@@ -278,7 +272,6 @@ function ulx.gag( calling_ply, target_ply, seconds, reason, should_ungag )
 		timer.Create("ULXGag_" .. target_ply:UserID(), seconds, 1, function()
 			if target_ply:IsValid() then
 				target_ply.ulx_gagged = false
-				target_ply:SetNWBool("ulx_gagged", nil)
 				target_ply:SetNWInt("ulx_gagged_time", nil)
 				target_ply:ChatPrint("Вы разгаганы")
 			end

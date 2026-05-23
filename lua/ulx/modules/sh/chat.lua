@@ -204,7 +204,7 @@ function ulx.mute( calling_ply, target_ply, seconds, reason, should_unmute )
 		timer.Create("ULXMute_" .. target_ply:UserID(), seconds, 1, function()
 			if target_ply:IsValid() then
 				target_ply.gimp = nil
-				target_ply:SetNWBool("ulx_muted", false)
+				target_ply:SetNWBool("ulx_muted", nil)
 				target_ply:ChatPrint("Вы размучены")
 			end
 		end)
@@ -246,7 +246,13 @@ mute:setOpposite( "ulx unmute", {_, _, _, _, true}, "!unmute" )
 
 if SERVER then
 	local function gimpCheck( ply, strText )
-		if ply.gimp == ID_MUTE then return "" end
+		if ply.gimp == ID_MUTE then
+			local timer_name = "ULXMute_" .. ply:UserID()
+			ply:ChatPrint(timer.Exists(timer_name) and "Вы замучены, до окончания мута осталось " .. timer.TimeLeft(timer_name) .. " секунд" or "Вы замучены")
+
+			return ""
+		end
+
 		if ply.gimp == ID_GIMP then
 			if #gimpSays < 1 then return nil end
 			return gimpSays[ math.random( #gimpSays ) ]
@@ -259,18 +265,21 @@ end
 function ulx.gag( calling_ply, target_ply, seconds, reason, should_ungag )
 	if should_ungag then
 		target_ply.ulx_gagged = false
-		target_ply:SetNWBool("ulx_gagged", false)
+		target_ply:SetNWBool("ulx_gagged", nil)
+		target_ply:SetNWInt("ulx_gagged_time", nil)
 		timer.Remove("ULXGag_" .. target_ply:UserID())
 	else
 		target_ply.ulx_gagged = true
 		target_ply:SetNWBool("ulx_gagged", true)
+		target_ply:SetNWInt("ulx_gagged_time", CurTime() + seconds)
 	end
 
 	if not should_ungag and seconds > 0 then
 		timer.Create("ULXGag_" .. target_ply:UserID(), seconds, 1, function()
 			if target_ply:IsValid() then
 				target_ply.ulx_gagged = false
-				target_ply:SetNWBool("ulx_gagged", false)
+				target_ply:SetNWBool("ulx_gagged", nil)
+				target_ply:SetNWInt("ulx_gagged_time", nil)
 				target_ply:ChatPrint("Вы разгаганы")
 			end
 		end)

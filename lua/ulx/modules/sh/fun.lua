@@ -529,7 +529,7 @@ doJail = function( v, seconds )
 		v.jail.unjail()
 	end
 
-	v:SetNWInt("ulx_jail_time", CurTime() + seconds)
+	v:SetNW2Int("ulx_jail_time", CurTime() + seconds)
 
 	if v:InVehicle() then
 		local vehicle = v:GetParent()
@@ -587,7 +587,7 @@ doJail = function( v, seconds )
 		ulx.clearExclusive( v )
 		ulx.setNoDie( v, false )
 
-		v:SetNWInt("ulx_jail_time", nil)
+		v:SetNW2Int("ulx_jail_time", nil)
 		v.jail = nil
 	end
 	if seconds > 0 then

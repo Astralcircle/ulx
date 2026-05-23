@@ -261,18 +261,18 @@ end
 function ulx.gag( calling_ply, target_ply, seconds, reason, should_ungag )
 	if should_ungag then
 		target_ply.ulx_gagged = false
-		target_ply:SetNWInt("ulx_gagged_time", nil)
+		target_ply:SetNW2Int("ulx_gagged_time", nil)
 		timer.Remove("ULXGag_" .. target_ply:UserID())
 	else
 		target_ply.ulx_gagged = true
-		target_ply:SetNWInt("ulx_gagged_time", CurTime() + seconds)
+		target_ply:SetNW2Int("ulx_gagged_time", CurTime() + seconds)
 	end
 
 	if not should_ungag and seconds > 0 then
 		timer.Create("ULXGag_" .. target_ply:UserID(), seconds, 1, function()
 			if target_ply:IsValid() then
 				target_ply.ulx_gagged = false
-				target_ply:SetNWInt("ulx_gagged_time", nil)
+				target_ply:SetNW2Int("ulx_gagged_time", nil)
 				target_ply:ChatPrint("Вы разгаганы")
 			end
 		end)

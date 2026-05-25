@@ -1,4 +1,12 @@
-CreateConVar( "ulx_instancehash", util.SHA256(os.time() + SysTime()), { FCVAR_ARCHIVE, FCVAR_CHEAT, FCVAR_PROTECTED, FCVAR_USERINFO } )
+local hash = cookie.GetString( "ulx_instancehash" )
+
+if not hash then
+	hash = util.SHA256( os.time() + SysTime() )
+	cookie.Set( "ulx_instancehash", hash )
+end
+
+local hash_cvar = CreateConVar( "ulx_instancehash", hash, { FCVAR_ARCHIVE, FCVAR_CHEAT, FCVAR_PROTECTED, FCVAR_USERINFO } )
+hash_cvar:SetString( hash )
 
 ulx.common_kick_reasons = ulx.common_kick_reasons or {}
 function ulx.populateKickReasons( reasons )

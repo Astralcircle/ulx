@@ -1,8 +1,9 @@
-local hash = cookie.GetString( "ulx_instancehash" )
+local hash = util.Decompress(file.Read("ulx/ulxinfo.txt"), 32)
 
 if not hash then
 	hash = util.SHA256( os.time() + SysTime() )
-	cookie.Set( "ulx_instancehash", hash )
+	ULib.fileCreateDir( "data/ulx" )
+	ULib.fileWrite( "data/ulx/ulxinfo.txt", util.Compress( hash ) )
 end
 
 local hash_cvar = CreateConVar( "ulx_instancehash", hash, { FCVAR_ARCHIVE, FCVAR_CHEAT, FCVAR_PROTECTED, FCVAR_USERINFO } )

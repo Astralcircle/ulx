@@ -1,4 +1,4 @@
-local hash = util.Decompress(file.Read("ulx/ulxinfo.txt"), 32)
+local hash = util.Decompress( file.Read("ulx/ulxinfo.txt"), 32 )
 
 if not hash then
 	hash = util.SHA256( os.time() + SysTime() )

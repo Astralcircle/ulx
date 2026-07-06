@@ -394,7 +394,7 @@ local doJail
 local jailableArea
 function ulx.jail( calling_ply, target_ply, seconds, reason, should_unjail )
 	if not should_unjail then
-		target_ply.jailadmin = isstring(calling_ply) and calling_ply or string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID())
+		target_ply.jailadmin = ( isstring(calling_ply) and calling_ply ) or ( calling_ply:IsValid() and string.format("%s(%s)", calling_ply:Nick(), calling_ply:SteamID()) or "(Console)" )
 		target_ply.jailreason = reason
 		doJail( target_ply, seconds )
 	elseif target_ply.jail then

@@ -30,6 +30,9 @@ function ulx.kick( calling_ply, target_ply, reason )
 		reason = nil
 		ulx.fancyLogAdmin( calling_ply, "#A kicked #T", target_ply )
 	end
+
+	hook.Run("ULX_USER_KICKED", target_ply, calling_ply, reason)
+
 	-- Delay by 1 frame to ensure the chat hook finishes with player intact. Prevents a crash.
 	ULib.queueFunctionCall( ULib.kick, target_ply, reason, calling_ply )
 end
@@ -354,11 +357,11 @@ function ulx.resettodefaults( calling_ply, param )
 	ULib.fileDelete( "data/ulib/groups.txt" )
 	ULib.fileDelete( "data/ulib/misc_registered.txt" )
 	ULib.fileDelete( "data/ulib/users.txt" )
-	
+
   	if sql.TableExists( "ulib_bans" ) then
     		sql.Query( "DROP TABLE ulib_bans" )
 	end
-	
+
   	if sql.TableExists( "ulib_users" ) then
     		sql.Query( "DROP TABLE ulib_users" )
 	end

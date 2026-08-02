@@ -483,10 +483,18 @@ function ulx.fancyLogAdmin( calling_ply, format, ... )
 			end
 		end
 
+		if Discord then
+			Discord.Send({
+				["content"] = table.concat( playerStrs[ i ] ),
+				["allowed_mentions"] = {
+					["parse"] = {}
+				}
+			})
+		end
+
 		if players[ i ] ~= "CONSOLE" then
 			ULib.tsayColor( players[ i ], true, unpack( playerStrs[ i ] ) )
 		else
-			local msg = table.concat( playerStrs[ i ] )
 			if game.IsDedicated() then
 				Msg( msg .. "\n" )
 			end

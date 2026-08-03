@@ -393,6 +393,7 @@ end
 function ulx.fancyLogAdmin( calling_ply, format, ... )
 	local use_self_suffix = false
 	local hide_echo = false
+	local private_echo = false
 	local players = {}
 	if logEcho:GetInt() ~= 0 then
 		players = player.GetAll()
@@ -406,6 +407,7 @@ function ulx.fancyLogAdmin( calling_ply, format, ... )
 	end
 
 	if type( format ) == "table" then
+		private_echo = true
 		players = format
 		format = args[ 1 ]
 		arg_pos = arg_pos + 1
@@ -488,7 +490,7 @@ function ulx.fancyLogAdmin( calling_ply, format, ... )
 		else
 			local msg = table.concat( playerStrs[ i ] )
 
-			if Discord then
+			if Discord and not hide_echo and not private_echo then
 				Discord.Send({
 					["content"] = msg,
 					["allowed_mentions"] = {

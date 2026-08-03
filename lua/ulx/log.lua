@@ -490,7 +490,7 @@ function ulx.fancyLogAdmin( calling_ply, format, ... )
 
 			if Discord then
 				Discord.Send({
-					["content"] = table.concat( playerStrs[ i ] ),
+					["content"] = msg,
 					["allowed_mentions"] = {
 						["parse"] = {}
 					}

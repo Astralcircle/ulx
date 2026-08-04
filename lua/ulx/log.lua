@@ -299,7 +299,7 @@ local function updateColors()
 		if not #pieces == 3 then Msg( "Warning: Tried to set ulx log color cvar with bad data\n" ) return end
 		local color = Color( tonumber( pieces[ 1 ] ), tonumber( pieces[ 2 ] ), tonumber( pieces[ 3 ] ) )
 
-		if cvar == logEchoColorDefault then default_color = color
+		if cvar == logEchoColorDefault then default_color = color color.Default = true
 		elseif cvar == logEchoColorConsole then console_color = color
 		elseif cvar == logEchoColorSelf then self_color = color
 		elseif cvar == logEchoColorEveryone then everyone_color = color
@@ -390,6 +390,14 @@ local function insertToAll( t, data )
 	end
 end
 
+local function clearColors( t )
+	for i=#t, 1, -1 do
+		if type( t[ i ] ) == "table" then
+			table.remove( t, i )
+		end
+	end
+end
+
 function ulx.fancyLogAdmin( calling_ply, format, ... )
 	local use_self_suffix = false
 	local hide_echo = false
@@ -477,27 +485,42 @@ function ulx.fancyLogAdmin( calling_ply, format, ... )
 	end
 
 	for i=1, #players do
-		if not logEchoColors:GetBool() or players[ i ] == "CONSOLE" then -- They don't want coloring :)
-			for j=#playerStrs[ i ], 1, -1 do
-				if type( playerStrs[ i ][ j ] ) == "table" then
-					table.remove( playerStrs[ i ], j )
-				end
-			end
-		end
-
 		if players[ i ] ~= "CONSOLE" then
+			if not logEchoColors:GetBool() then clearColors( playerStrs[ i ] ) end
 			ULib.tsayColor( players[ i ], true, unpack( playerStrs[ i ] ) )
 		else
-			local msg = table.concat( playerStrs[ i ] )
-
 			if Discord and not hide_echo and not private_echo then
+				local discord_msg = {}
+				local close_tilda = false
+
+				for j=1, #playerStrs[ i ] do
+					local value = playerStrs[ i ][ j ]
+
+					if type( value ) == "table" then
+						if not value.Default then
+							table.insert( discord_msg, "`" )
+							close_tilda = true
+						end
+					else
+						table.insert( discord_msg, value )
+
+						if close_tilda then
+							table.insert( discord_msg, "`" )
+							close_tilda = false
+						end
+					end
+				end
+
 				Discord.Send({
-					["content"] = msg,
+					["content"] = table.concat( discord_msg ),
 					["allowed_mentions"] = {
 						["parse"] = {}
 					}
 				})
 			end
+
+			clearColors( playerStrs[ i ] )
+			local msg = table.concat( playerStrs[ i ] )
 
 			if game.IsDedicated() then
 				Msg( msg .. "\n" )

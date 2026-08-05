@@ -502,7 +502,7 @@ function ulx.fancyLogAdmin( calling_ply, format, ... )
 							close_tilda = true
 						end
 					else
-						table.insert( string.Replace( discord_msg, "`", "'" ), value )
+						table.insert( discord_msg, string.Replace( value, "`", "'" ) )
 
 						if close_tilda then
 							table.insert( discord_msg, "`" )

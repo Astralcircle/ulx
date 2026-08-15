@@ -359,11 +359,11 @@ function ulx.resettodefaults( calling_ply, param )
 	ULib.fileDelete( "data/ulib/users.txt" )
 
   	if sql.TableExists( "ulib_bans" ) then
-    		sql.Query( "DROP TABLE ulib_bans" )
+    		sql.QueryTyped( "DROP TABLE ulib_bans" )
 	end
 
   	if sql.TableExists( "ulib_users" ) then
-    		sql.Query( "DROP TABLE ulib_users" )
+    		sql.QueryTyped( "DROP TABLE ulib_users" )
 	end
 
 	local str = "Please change levels to finish the reset"

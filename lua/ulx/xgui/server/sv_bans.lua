@@ -219,8 +219,8 @@ function bans.init()
 		local noFilter = ( filterPermaBan == 0 and filterIncomplete == 0 and filterString == nil )
 
 		for i = startValue, endValue, ascending and -1 or 1 do
-			local steamID = sortTable[i][1]
-			local bandata = ULib.getBan( util.SteamIDFrom64( steamID ) )
+			local steamID = util.SteamIDFrom64( sortTable[i][1] )
+			local bandata = ULib.getBan( steamID )
 
 			-- Handle filters. This is confusing, but essentially 0 means skip check, 1 means restrict if condition IS true, 2+ means restrict if condition IS NOT true.
 			if not ( filterPermaBan > 0 and ( ( tonumber( bandata.unban ) == 0 ) == ( filterPermaBan == 1 ) ) ) then
@@ -237,6 +237,7 @@ function bans.init()
 						--We found a valid one! .. Now for the pagination.
 						if #bansToSend < 17 and currentEntry >= firstEntry then
 							table.insert( bansToSend, bandata )
+							bansToSend[#bansToSend].steamid = nil
 							bansToSend[#bansToSend].steamID = steamID
 							if noFilter and #bansToSend >= 17 then break end	-- If there is a filter, then don't stop the loop so we can get a "result" count.
 						end

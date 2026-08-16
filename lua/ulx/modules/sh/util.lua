@@ -114,7 +114,8 @@ function ulx.unban( calling_ply, steamid )
 		return
 	end
 
-	name = ULib.bans[ steamid ] and ULib.bans[ steamid ].name
+	local banData = ULib.getBan( steamid )
+	name = banData and banData.name
 
 	ULib.unban( steamid, calling_ply )
 	if name then

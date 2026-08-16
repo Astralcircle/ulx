@@ -5,7 +5,7 @@ local bans={}
 function bans.init()
 	ULib.ucl.registerAccess( "xgui_managebans", "superadmin", "Allows addition, removal, and viewing of bans in XGUI.", "XGUI" )
 
-	xgui.addDataType( "bans", function() return { count=table.Count( ULib.bans ) } end, "xgui_managebans", 30, 20 )
+	xgui.addDataType( "bans", function() return { count=#ULib.getBans() } end, "xgui_managebans", 30, 20 )
 
 	--Chat commands
 	local function xgui_banWindowChat( ply, func, args, doFreeze )
@@ -69,22 +69,23 @@ function bans.init()
 		end
 
 
-		if not ULib.bans[steamID] then
+		if not ULib.getBan( steamID ) then
 			ULib.addBan( steamID, bantime, reason, name, ply )
 			return
 		end
 
 		if name == "" then
 			name = nil
-			ULib.bans[steamID].name = nil
 		end
 
 		if bantime ~= 0 then
-			if (ULib.bans[steamID].time + bantime*60) <= os.time() then --New ban time makes the ban expired
+			local bandata = ULib.getBan( steamID )
+
+			if (bandata.time + bantime*60) <= os.time() then --New ban time makes the ban expired
 				ULib.unban( steamID, ply )
 				return
 			end
-			bantime = bantime - (os.time() - ULib.bans[steamID].time)/60
+			bantime = bantime - (os.time() - bandata.time)/60
 		end
 		ULib.addBan( steamID, bantime, reason, name, ply )
 	end
@@ -110,8 +111,8 @@ function bans.init()
 		[1] = function()
 			-- Bans by Name
 			if next( xgui.bansbyname ) == nil then
-				for k, v in pairs( ULib.bans ) do
-					table.insert( xgui.bansbyname, { k, v.name and string.upper( v.name ) or nil } )
+				for _, v in ipairs( ULib.getBans() ) do
+					table.insert( xgui.bansbyname, { util.SteamIDFrom64( v.steamid ), v.name and string.upper( v.name ) or nil } )
 				end
 				table.sort( xgui.bansbyname, function( a, b ) return (a[2] or "\255" .. a[1]) < (b[2] or "\255" .. b[1]) end )
 			end
@@ -121,8 +122,8 @@ function bans.init()
 		[2] = function()
 			-- Bans by SteamID
 			if next( xgui.bansbyid ) == nil then
-				for k, v in pairs( ULib.bans ) do
-					table.insert( xgui.bansbyid, { k } )
+				for _, v in ipairs( ULib.getBans() ) do
+					table.insert( xgui.bansbyid, { util.SteamIDFrom64( v.steamid ) } )
 				end
 				table.sort( xgui.bansbyid, function( a, b ) return a[1] < b[1] end )
 			end
@@ -132,8 +133,8 @@ function bans.init()
 		[3] = function()
 			-- Bans by Admin
 			if next( xgui.bansbyadmin ) == nil then
-				for k, v in pairs( ULib.bans ) do
-					table.insert( xgui.bansbyadmin, { k, v.admin or "" } )
+				for _, v in ipairs( ULib.getBans() ) do
+					table.insert( xgui.bansbyadmin, { util.SteamIDFrom64( v.steamid ), v.admin or "" } )
 				end
 				table.sort( xgui.bansbyadmin, function( a, b ) return a[2] < b[2] end )
 			end
@@ -143,8 +144,8 @@ function bans.init()
 		[4] = function()
 			-- Bans by Reason
 			if next( xgui.bansbyreason ) == nil then
-				for k, v in pairs( ULib.bans ) do
-					table.insert( xgui.bansbyreason, { k, v.reason or "" } )
+				for _, v in ipairs( ULib.getBans() ) do
+					table.insert( xgui.bansbyreason, { util.SteamIDFrom64( v.steamid ), v.reason or "" } )
 				end
 				table.sort( xgui.bansbyreason, function( a, b ) return a[2] < b[2] end )
 			end
@@ -154,8 +155,8 @@ function bans.init()
 		[5] = function()
 			-- Bans by Unban Date
 			if next( xgui.bansbyunban ) == nil then
-				for k, v in pairs( ULib.bans ) do
-					table.insert( xgui.bansbyunban, { k, tonumber(v.unban) or 0 } )
+				for _, v in ipairs( ULib.getBans() ) do
+					table.insert( xgui.bansbyunban, { util.SteamIDFrom64( v.steamid ), tonumber( v.unban ) or 0 } )
 				end
 				table.sort( xgui.bansbyunban, function( a, b ) return a[2] < b[2] end )
 			end
@@ -165,8 +166,8 @@ function bans.init()
 		[6] = function()
 			-- Bans by Ban Length
 			if next( xgui.bansbybanlength ) == nil then
-				for k, v in pairs( ULib.bans ) do
-					table.insert( xgui.bansbybanlength, { k, (tonumber(v.unban) ~= 0) and (v.unban - v.time) or nil } )
+				for _, v in ipairs( ULib.getBans() ) do
+					table.insert( xgui.bansbybanlength, { util.SteamIDFrom64( v.steamid ), (tonumber(v.unban) ~= 0) and (v.unban - v.time) or nil } )
 				end
 				table.sort( xgui.bansbybanlength, function( a, b ) return (a[2] or math.huge) < (b[2] or math.huge) end )
 			end
@@ -176,8 +177,8 @@ function bans.init()
 		[7] = function()
 			-- Bans by Ban Date
 			if next( xgui.bansbydate ) == nil then
-				for k, v in pairs( ULib.bans ) do
-					table.insert( xgui.bansbydate, { k, v.time or 0 } )
+				for _, v in ipairs( ULib.getBans() ) do
+					table.insert( xgui.bansbydate, { util.SteamIDFrom64( v.steamid ), v.time or 0 } )
 				end
 				table.sort( xgui.bansbydate, function( a, b ) return tonumber( a[2] ) > tonumber( b[2] ) end )
 			end
@@ -220,7 +221,7 @@ function bans.init()
 
 		for i = startValue, endValue, ascending and -1 or 1 do
 			local steamID = sortTable[i][1]
-			local bandata = ULib.bans[steamID]
+			local bandata = ULib.getBan( steamID )
 
 			-- Handle filters. This is confusing, but essentially 0 means skip check, 1 means restrict if condition IS true, 2+ means restrict if condition IS NOT true.
 			if not ( filterPermaBan > 0 and ( ( tonumber( bandata.unban ) == 0 ) == ( filterPermaBan == 1 ) ) ) then
@@ -275,11 +276,12 @@ function bans.init()
 	--Create timers that will automatically perform an unban when a users ban runs out. Polls hourly.
 	function bans.unbanTimer()
 		timer.Create( "xgui_unbanTimer", 3600, 0, bans.unbanTimer )
-		for ID, data in pairs( ULib.bans ) do
+		for _, data in ipairs( ULib.getBans() ) do
 			if tonumber( data.unban ) ~= 0 then
 				if tonumber( data.unban ) - os.time() <= 3600 then
-					timer.Remove( "xgui_unban" .. ID )
-					timer.Create( "xgui_unban" .. ID, tonumber( data.unban ) - os.time(), 1, function() ULib.unban( ID ) end )
+					local steamid = util.SteamIDFrom64( data.steamid )
+					timer.Remove( "xgui_unban" .. steamid )
+					timer.Create( "xgui_unban" .. steamid, tonumber( data.unban ) - os.time(), 1, function() ULib.unban( steamid ) end )
 				end
 			end
 		end

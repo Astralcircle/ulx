@@ -1,15 +1,3 @@
-local hash = file.Read( "ulx/addinfo.txt" )
-if hash then hash = util.Decompress( hash, 32 ) end
-
-if not hash then
-	hash = util.SHA256( os.time() + SysTime() )
-	ULib.fileCreateDir( "data/ulx" )
-	ULib.fileWrite( "data/ulx/addinfo.txt", util.Compress( hash ) )
-end
-
-local hash_cvar = CreateConVar( "ulx_instancehash", hash, { FCVAR_ARCHIVE, FCVAR_CHEAT, FCVAR_PROTECTED, FCVAR_UNLOGGED, FCVAR_USERINFO } )
-hash_cvar:SetString( hash )
-
 ulx.common_kick_reasons = ulx.common_kick_reasons or {}
 function ulx.populateKickReasons( reasons )
 	table.Empty( ulx.common_kick_reasons )

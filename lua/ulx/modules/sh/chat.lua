@@ -192,14 +192,18 @@ gimp:setOpposite( "ulx ungimp", {_, _, true}, "!ungimp" )
 function ulx.mute( calling_ply, target_ply, seconds, reason, should_unmute )
 	if should_unmute then
 		target_ply.gimp = nil
-		timer.Remove("ULXMute_" .. target_ply:UserID())
+		timer.Remove("ULXMute_" .. target_ply:SteamID())
 	else
 		target_ply.gimp = ID_MUTE
 	end
 
 	if not should_unmute and seconds > 0 then
-		timer.Create("ULXMute_" .. target_ply:UserID(), seconds, 1, function()
-			if target_ply:IsValid() then
+		local steamid = target_ply:SteamID()
+
+		timer.Create("ULXMute_" .. target_ply:SteamID(), seconds, 1, function()
+			local ply = player.GetBySteamID(steamid)
+
+			if ply:IsValid() then
 				target_ply.gimp = nil
 				target_ply:ChatPrint("Вы размучены")
 			end
@@ -243,7 +247,7 @@ mute:setOpposite( "ulx unmute", {_, _, _, _, true}, "!unmute" )
 if SERVER then
 	local function gimpCheck( ply, strText )
 		if ply.gimp == ID_MUTE then
-			local timer_name = "ULXMute_" .. ply:UserID()
+			local timer_name = "ULXMute_" .. ply:SteamID()
 			ply:ChatPrint(timer.Exists(timer_name) and "Вы замучены, до окончания мута осталось " .. math.ceil(timer.TimeLeft(timer_name)) .. " секунд" or "Вы замучены")
 
 			return ""
@@ -262,18 +266,22 @@ function ulx.gag( calling_ply, target_ply, seconds, reason, should_ungag )
 	if should_ungag then
 		target_ply.ulx_gagged = false
 		target_ply:SetNW2Int("ulx_gagged_time", nil)
-		timer.Remove("ULXGag_" .. target_ply:UserID())
+		timer.Remove("ULXGag_" .. target_ply:SteamID())
 	else
 		target_ply.ulx_gagged = true
 		target_ply:SetNW2Int("ulx_gagged_time", seconds > 0 and CurTime() + seconds or 0)
 	end
 
 	if not should_ungag and seconds > 0 then
-		timer.Create("ULXGag_" .. target_ply:UserID(), seconds, 1, function()
-			if target_ply:IsValid() then
-				target_ply.ulx_gagged = false
-				target_ply:SetNW2Int("ulx_gagged_time", nil)
-				target_ply:ChatPrint("Вы разгаганы")
+		local steamid = target_ply:SteamID()
+
+		timer.Create("ULXGag_" .. steamid, seconds, 1, function()
+			local ply = player.GetBySteamID(steamid)
+
+			if ply:IsValid() then
+				ply.ulx_gagged = false
+				ply:SetNW2Int("ulx_gagged_time", nil)
+				ply:ChatPrint("Вы разгаганы")
 			end
 		end)
 	end
@@ -318,6 +326,22 @@ local function gagHook( listener, talker )
 	end
 end
 hook.Add( "PlayerCanHearPlayersVoice", "ULXGag", gagHook )
+
+-- Restore non-permanent gags/mutes after reconnect
+hook.Add("PlayerInitialSpawn", "ulxMuteRestore", function(ply)
+	local mute_name = "ULXMute_" .. ply:SteamID()
+
+	if timer.Exists(mute_name) then
+		ply.gimp = ID_MUTE
+	end
+
+	local gag_name = "ULXGag_" .. ply:SteamID()
+
+	if timer.Exists(gag_name) then
+		ply.ulx_gagged = true
+		ply:SetNW2Int("ulx_gagged_time", CurTime() + timer.TimeLeft(gag_name))
+	end
+end)
 
 -- Anti-spam stuff
 if SERVER then

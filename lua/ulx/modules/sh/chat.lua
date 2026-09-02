@@ -203,7 +203,7 @@ function ulx.mute( calling_ply, target_ply, seconds, reason, should_unmute )
 		timer.Create("ULXMute_" .. target_ply:SteamID(), seconds, 1, function()
 			local ply = player.GetBySteamID(steamid)
 
-			if ply:IsValid() then
+			if ply then
 				target_ply.gimp = nil
 				target_ply:ChatPrint("Вы размучены")
 			end
@@ -278,7 +278,7 @@ function ulx.gag( calling_ply, target_ply, seconds, reason, should_ungag )
 		timer.Create("ULXGag_" .. steamid, seconds, 1, function()
 			local ply = player.GetBySteamID(steamid)
 
-			if ply:IsValid() then
+			if ply then
 				ply.ulx_gagged = false
 				ply:SetNW2Int("ulx_gagged_time", nil)
 				ply:ChatPrint("Вы разгаганы")

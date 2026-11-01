@@ -1,65 +1,67 @@
 local CATEGORY_NAME = "Menus"
 
 if ULib.fileExists( "lua/ulx/modules/cl/motdmenu.lua" ) or ulx.motdmenu_exists then
-	local function sendMotd( ply, showMotd )
-		if ply.ulxHasMotd then return end -- This player already has the motd data
-		if showMotd == "1" then -- Assume it's a file
-			if not ULib.fileExists( GetConVarString( "ulx_motdfile" ) ) then return end -- Invalid
-			local f = ULib.fileRead( GetConVarString( "ulx_motdfile" ) )
+	if SERVER then
+		local function sendMotd( ply, showMotd )
+			if ply.ulxHasMotd then return end -- This player already has the motd data
+			if showMotd == "1" then -- Assume it's a file
+				if not ULib.fileExists( GetConVarString( "ulx_motdfile" ) ) then return end -- Invalid
+				local f = ULib.fileRead( GetConVarString( "ulx_motdfile" ) )
 
-			ULib.clientRPC( ply, "ulx.rcvMotd", showMotd, f )
+				ULib.clientRPC( ply, "ulx.rcvMotd", showMotd, f )
 
-		elseif showMotd == "2" then
-			ULib.clientRPC( ply, "ulx.rcvMotd", showMotd, ulx.motdSettings )
+			elseif showMotd == "2" then
+				ULib.clientRPC( ply, "ulx.rcvMotd", showMotd, ulx.motdSettings )
 
-		else -- Assume URL
-			ULib.clientRPC( ply, "ulx.rcvMotd", showMotd, GetConVarString( "ulx_motdurl" ) )
-		end
-		ply.ulxHasMotd = true
-	end
-
-	local function showMotd( ply )
-		local showMotd = GetConVarString( "ulx_showMotd" )
-		if showMotd == "0" then return end
-		if not ply:IsValid() then return end -- They left, doh!
-
-		sendMotd( ply, showMotd )
-		ULib.clientRPC( ply, "ulx.showMotdMenu", ply:SteamID() ) -- Passing it because they may get it before LocalPlayer() is valid
-	end
-	hook.Add( "PlayerInitialSpawn", "showMotd", showMotd )
-
-	function ulx.motdUpdated()
-		for i=1, #player.GetAll() do
-			player.GetAll()[i].ulxHasMotd = false
-		end
-	end
-
-	local function conVarUpdated( sv_cvar, cl_cvar, ply, old_val, new_val )
-		if string.lower( cl_cvar ) == "ulx_showmotd" or string.lower( cl_cvar ) == "ulx_motdfile" or string.lower( cl_cvar ) == "ulx_motdurl" then
-			ulx.motdUpdated()
-		end
-	end
-	hook.Add( "ULibReplicatedCvarChanged", "ulx.clearMotdCache", conVarUpdated )
-
-	function ulx.motd( calling_ply )
-		if not calling_ply:IsValid() then
-			Msg( "You can't see the motd from the console.\n" )
-			return
-		end
-
-		if GetConVarString( "ulx_showMotd" ) == "0" then
-			if GetConVarString( "ulx_motdDisabledMessage" ) == "1" then
-				ULib.tsay( calling_ply, "The MOTD has been disabled on this server." )
+			else -- Assume URL
+				ULib.clientRPC( ply, "ulx.rcvMotd", showMotd, GetConVarString( "ulx_motdurl" ) )
 			end
-			return
+			ply.ulxHasMotd = true
 		end
 
-		if GetConVarString( "ulx_showMotd" ) == "1" and not ULib.fileExists( GetConVarString( "ulx_motdfile" ) ) then
-			ULib.tsay( calling_ply, "The MOTD file could not be found." )
-			return
+		local function showMotd( ply )
+			local showMotd = GetConVarString( "ulx_showMotd" )
+			if showMotd == "0" then return end
+			if not ply:IsValid() then return end -- They left, doh!
+
+			sendMotd( ply, showMotd )
+			ULib.clientRPC( ply, "ulx.showMotdMenu", ply:SteamID() ) -- Passing it because they may get it before LocalPlayer() is valid
+		end
+		hook.Add( "PlayerInitialSpawn", "showMotd", showMotd )
+
+		function ulx.motdUpdated()
+			for i=1, #player.GetAll() do
+				player.GetAll()[i].ulxHasMotd = false
+			end
 		end
 
-		showMotd( calling_ply )
+		local function conVarUpdated( sv_cvar, cl_cvar, ply, old_val, new_val )
+			if string.lower( cl_cvar ) == "ulx_showmotd" or string.lower( cl_cvar ) == "ulx_motdfile" or string.lower( cl_cvar ) == "ulx_motdurl" then
+				ulx.motdUpdated()
+			end
+		end
+		hook.Add( "ULibReplicatedCvarChanged", "ulx.clearMotdCache", conVarUpdated )
+
+		function ulx.motd( calling_ply )
+			if not calling_ply:IsValid() then
+				Msg( "You can't see the motd from the console.\n" )
+				return
+			end
+
+			if GetConVarString( "ulx_showMotd" ) == "0" then
+				if GetConVarString( "ulx_motdDisabledMessage" ) == "1" then
+					ULib.tsay( calling_ply, "The MOTD has been disabled on this server." )
+				end
+				return
+			end
+
+			if GetConVarString( "ulx_showMotd" ) == "1" and not ULib.fileExists( GetConVarString( "ulx_motdfile" ) ) then
+				ULib.tsay( calling_ply, "The MOTD file could not be found." )
+				return
+			end
+
+			showMotd( calling_ply )
+		end
 	end
 	local motdmenu = ulx.command( CATEGORY_NAME, "ulx motd", ulx.motd, "!motd" )
 	motdmenu:defaultAccess( ULib.ACCESS_ALL )
@@ -125,5 +127,4 @@ if ULib.fileExists( "lua/ulx/modules/cl/motdmenu.lua" ) or ulx.motdmenu_exists t
 		end
 		hook.Add( ULib.HOOK_UCLCHANGED, "ulx.updateMotd.adminsChanged", ulx.populateMotdData )
 	end
-
 end

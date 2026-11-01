@@ -1,4 +1,4 @@
-CATEGORY_NAME = "Teleport"
+local CATEGORY_NAME = "Teleport"
 
 if SERVER then
 	local function spiralGrid(rings)

@@ -29,7 +29,6 @@ if SERVER then
 
 		return grid
 	end
-	local tpGrid = spiralGrid( 24 )
 
 	-- Based on code donated by Timmy (https://github.com/Toxsa)
 	function ulx.bring( calling_ply, target_plys )
@@ -82,6 +81,7 @@ if SERVER then
 		local players_involved = table.Copy( teleportable_plys )
 		table.insert( players_involved, calling_ply )
 
+	  local tpGrid = spiralGrid( 24 )
 	  local affected_plys = {}
 
 	  for i=1, #tpGrid do
